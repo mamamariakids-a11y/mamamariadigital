@@ -58,6 +58,7 @@ app.get('/', (req, res) => {
     teacher: '/teacher',
     parent: '/parent',
     staff: '/staff',
+    driver: '/driver',
   };
   res.redirect(roleHome[req.session.user.role] || '/login');
 });
@@ -71,6 +72,15 @@ app.use('/admin', require('./routes/admin'));
 app.use('/parent', require('./routes/parent'));
 app.use('/staff', require('./routes/staff'));
 app.use('/events', require('./routes/events'));
+app.use('/finance', require('./routes/finance'));
+app.use('/pickup', require('./routes/pickup'));
+app.use('/q', require('./routes/qr'));
+app.use('/transport', require('./routes/transport'));
+app.use('/driver', require('./routes/driver'));
+app.use('/payroll', require('./routes/payroll'));
+app.use('/messages', require('./routes/messages'));
+app.use('/search', require('./routes/search'));
+app.use('/', require('./routes/register'));
 
 app.use((req, res) => {
   res.status(404).render('error', {
@@ -96,6 +106,13 @@ db.ready.then(() => {
   app.listen(PORT, () => {
     console.log(`🌱 روضة ماما ماريا تعمل الآن على المنفذ ${PORT}`);
   });
+  // Started only after the schema/seed are ready, and wrapped so a cron
+  // setup problem can never prevent the server itself from starting.
+  try {
+    require('./utils/cron').startScheduledJobs();
+  } catch (err) {
+    console.error('تعذر تفعيل المهام المجدولة:', err);
+  }
 }).catch((err) => {
   console.error('فشل الاتصال بقاعدة البيانات عند بدء التشغيل:', err);
   process.exit(1);
