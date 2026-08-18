@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الحضور والغياب</h1>
+    <div class="sub">سجّلي حضور أطفال فصلك يوميًا</div>
+  </div>
+</div>
+
+<% if (!classes.length) { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="es-icon">🏫</div>
+      <h3>لم يتم تعيين فصل لحسابك بعد</h3>
+      <p>يرجى التواصل مع إدارة الروضة لربط حسابك بأحد الفصول.</p>
+    </div>
+  </div>
+<% } else { %>
+
+<div class="card mt-0">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?class_id=<%= activeClass.id %>&date=<%= dayjs(date).subtract(1,'day').format('YYYY-MM-DD') %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?class_id=<%= activeClass.id %>"><span style="font-size:12px;">اليوم</span></a>
+      <a class="nav-btn" href="?class_id=<%= activeClass.id %>&date=<%= dayjs(date).add(1,'day').format('YYYY-MM-DD') %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= dayjs(date).format('dddd DD MMMM YYYY') %></div>
+    </div>
+    <% if (classes.length > 1) { %>
+      <div class="view-switch">
+        <% classes.forEach(function(c) { %>
+          <a class="<%= c.id === activeClass.id ? 'active' : '' %>" href="?class_id=<%= c.id %>&date=<%= date %>"><%= c.name %></a>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <% if (!children.length) { %>
+    <div class="empty-state">
+      <div class="es-icon">👶</div>
+      <h3>لا يوجد أطفال مسجّلون في هذا الفصل بعد</h3>
+    </div>
+  <% } else { %>
+    <form method="POST" action="/teacher/attendance" id="attForm">
+      <input type="hidden" name="class_id" value="<%= activeClass.id %>" />
+      <input type="hidden" name="date" value="<%= date %>" />
+
+      <div class="flex-between" style="margin-bottom:14px;">
+        <span class="text-muted" style="font-size:13px;"><%= markedCount %> من <%= children.length %> تم تسجيلهم</span>
+        <button type="button" class="btn btn-secondary btn-sm" id="markAllPresent"><i class="fa-solid fa-check-double"></i> تحديد الكل حاضر</button>
+      </div>
+
+      <% children.forEach(function(c) { %>
+        <div class="assign-row">
+          <div class="a-left">
+            <div style="font-weight:700;"><%= c.name %></div>
+            <a href="/teacher/children/<%= c.id %>/health" class="btn btn-secondary btn-sm" title="السجل الصحي"><i class="fa-solid fa-notes-medical"></i></a>
+          </div>
+          <div class="radio-row att-radio">
+            <label><input type="radio" name="status_<%= c.id %>" value="present" <%= c.status === 'present' ? 'checked' : '' %> /><span class="att-present">✅ حاضر</span></label>
+            <label><input type="radio" name="status_<%= c.id %>" value="absent" <%= c.status === 'absent' ? 'checked' : '' %> /><span class="att-absent">❌ غائب</span></label>
+          </div>
+        </div>
+      <% }) %>
+
+      <button type="submit" class="btn btn-primary" style="margin-top:16px;"><i class="fa-solid fa-floppy-disk"></i> حفظ الحضور والغياب</button>
+    </form>
+  <% } %>
+</div>
+<% } %>
+
+<script>
+  document.getElementById('markAllPresent')?.addEventListener('click', function () {
+    document.querySelectorAll('#attForm input[value="present"]').forEach(function (el) { el.checked = true; });
+  });
+</script>
+
+<%- include('../partials/footer') %>

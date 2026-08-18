@@ -1,0 +1,83 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>النقل المدرسي</h1>
+    <div class="sub">إدارة خطوط الحافلات، السائقين، وربط الأطفال بكل خط</div>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<% if (!drivers.length) { %>
+  <div class="alert alert-warning">لا يوجد حساب "سائق" بعد. أضيفي واحدًا من <a href="/admin/users">صفحة المستخدمين</a> (الدور: سائق النقل المدرسي) قبل إسناد خط له.</div>
+<% } %>
+
+<div class="grid" style="grid-template-columns: 1.7fr 1fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">خطوط النقل</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>اسم الخط</th><th>السائق</th><th>المرافق</th><th>الرحلات</th><th>عدد الأطفال</th><th></th></tr></thead>
+        <tbody>
+          <% routes.forEach(function(r) { %>
+            <tr>
+              <td style="font-weight:700;"><%= r.name %></td>
+              <td><%= r.driver_name || '—' %></td>
+              <td><%= r.assistant_name || '—' %></td>
+              <td><%= tripLabels[r.trip_type] %></td>
+              <td><%= r.children_count %></td>
+              <td>
+                <div class="gap-8">
+                  <a href="/transport/<%= r.id %>/assign" class="btn btn-secondary btn-sm" title="تعيين الأطفال"><i class="fa-solid fa-user-group"></i></a>
+                  <a href="/transport/<%= r.id %>/logs" class="btn btn-secondary btn-sm" title="سجل الرحلات"><i class="fa-solid fa-clock-rotate-left"></i></a>
+                  <form method="POST" action="/transport/<%= r.id %>/delete" onsubmit="return confirm('حذف هذا الخط؟');" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (!routes.length) { %><tr><td colspan="6" class="text-muted">لا توجد خطوط نقل بعد</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">إضافة خط نقل جديد</div>
+    <form method="POST" action="/transport">
+      <div class="form-group">
+        <label class="field-label">اسم الخط</label>
+        <input type="text" name="name" required placeholder="مثال: خط حي النصر" />
+      </div>
+      <div class="form-group">
+        <label class="field-label">السائق</label>
+        <select name="driver_id">
+          <option value="">بدون سائق حاليًا</option>
+          <% drivers.forEach(function(d) { %>
+            <option value="<%= d.id %>"><%= d.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">اسم المرافق (اختياري)</label>
+        <input type="text" name="assistant_name" />
+      </div>
+      <div class="form-group">
+        <label class="field-label">الرحلات</label>
+        <select name="trip_type">
+          <option value="both">صباحًا ومساءً</option>
+          <option value="morning">صباحًا فقط</option>
+          <option value="evening">مساءً فقط</option>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">ملاحظات (اختياري)</label>
+        <textarea name="notes" rows="2"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-plus"></i> إضافة الخط</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

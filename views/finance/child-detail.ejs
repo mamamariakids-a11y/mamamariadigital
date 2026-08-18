@@ -1,0 +1,195 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1><%= child.name %></h1>
+    <div class="sub"><%= child.class_name || 'بدون فصل' %> · ولي الأمر: <%= child.parent_name || 'غير مربوط' %></div>
+  </div>
+  <a href="/finance/children" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> عودة</a>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<div class="grid grid-3">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-sack-dollar"></i></div>
+    <div><div class="stat-value"><%= balance.totalDue.toLocaleString('ar') %> دج</div><div class="stat-label">إجمالي المستحق</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-circle-check"></i></div>
+    <div><div class="stat-value"><%= balance.totalPaid.toLocaleString('ar') %> دج</div><div class="stat-label">إجمالي المدفوع</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:<%= balance.totalRemaining > 0 ? '#D9634F' : '#3AA0A0' %>;"><i class="fa-solid fa-scale-unbalanced"></i></div>
+    <div><div class="stat-value"><%= balance.totalRemaining.toLocaleString('ar') %> دج</div><div class="stat-label">المتبقي</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">إعدادات الحساب المالي</div>
+  <% if (canEditAccount) { %>
+    <form method="POST" action="/finance/children/<%= child.id %>/account">
+      <div class="grid grid-3">
+        <div class="form-group mt-0">
+          <label class="field-label">خطة الاشتراك</label>
+          <select name="fee_plan_id">
+            <option value="">بدون خطة</option>
+            <% plans.forEach(function(p) { %>
+              <option value="<%= p.id %>" <%= account && account.fee_plan_id === p.id ? 'selected' : '' %>><%= p.name %> (<%= p.price %> دج)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">رسوم التسجيل</label>
+          <input type="number" step="0.01" name="registration_fee" value="<%= account ? account.registration_fee : 0 %>" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">ترتيب الطفل بين إخوته (لتخفيض الإخوة)</label>
+          <input type="number" min="1" name="sibling_rank" value="<%= account ? account.sibling_rank : 1 %>" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="checkbox-pill"><input type="checkbox" name="transport_enabled" value="1" <%= account && account.transport_enabled ? 'checked' : '' %> /> النقل المدرسي مفعّل</label>
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">رسوم النقل الشهرية</label>
+          <input type="number" step="0.01" name="transport_fee" value="<%= account ? account.transport_fee : 0 %>" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="checkbox-pill"><input type="checkbox" name="exempt" value="1" <%= account && account.exempt ? 'checked' : '' %> /> معفى بالكامل من الرسوم</label>
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">نوع التخفيض اليدوي</label>
+          <select name="discount_type">
+            <option value="" <%= !account || !account.discount_type ? 'selected' : '' %>>بدون تخفيض يدوي</option>
+            <option value="fixed" <%= account && account.discount_type === 'fixed' ? 'selected' : '' %>>مبلغ ثابت</option>
+            <option value="percent" <%= account && account.discount_type === 'percent' ? 'selected' : '' %>>نسبة مئوية</option>
+          </select>
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">قيمة التخفيض</label>
+          <input type="number" step="0.01" name="discount_value" value="<%= account ? account.discount_value : 0 %>" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">سبب التخفيض/الإعفاء</label>
+          <input type="text" name="discount_reason" value="<%= account ? (account.discount_reason || '') : '' %>" />
+        </div>
+      </div>
+      <div class="form-hint" style="margin-bottom:14px;">
+        يُطبَّق التخفيض اليدوي إن وُجد؛ وإلا يُطبَّق تلقائيًا تخفيض ترتيب الإخوة المُعدّ في الإعدادات المالية.
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الحساب</button>
+    </form>
+  <% } else if (!account) { %>
+    <div class="empty-state"><div class="es-icon">💳</div><h3>لا يوجد ملف مالي بعد لهذا الطفل</h3></div>
+  <% } else { %>
+    <p class="text-muted">خطة الاشتراك: <%= account.fee_plan_id ? plans.find(p => p.id === account.fee_plan_id)?.name || '—' : '—' %></p>
+  <% } %>
+</div>
+
+<% if (account) { %>
+<div class="card">
+  <div class="flex-between">
+    <div class="card-title mt-0">الاستحقاقات الشهرية</div>
+    <% if (canEditAccount) { %>
+      <form method="POST" action="/finance/children/<%= child.id %>/generate-month">
+        <input type="hidden" name="month" value="<%= dayjs().format('YYYY-MM') %>" />
+        <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate"></i> توليد استحقاق هذا الشهر</button>
+      </form>
+    <% } %>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الشهر</th><th>المستحق</th><th>المدفوع</th><th>الحالة</th></tr></thead>
+      <tbody>
+        <% balance.months.forEach(function(m) { %>
+          <tr>
+            <td><%= dayjs(m.month, 'YYYY-MM').format('MMMM YYYY') %></td>
+            <td><%= Number(m.amount_due).toLocaleString('ar') %> دج</td>
+            <td><%= Number(m.amount_paid).toLocaleString('ar') %> دج</td>
+            <td><span class="badge <%= feeStatusBadge[m.status] %>"><%= feeStatusLabels[m.status] %></span></td>
+          </tr>
+        <% }) %>
+        <% if (!balance.months.length) { %><tr><td colspan="4" class="text-muted">لا توجد استحقاقات مسجّلة بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">تسجيل دفعة جديدة</div>
+  <form method="POST" action="/finance/children/<%= child.id %>/payments">
+    <div class="grid grid-3">
+      <div class="form-group mt-0">
+        <label class="field-label">السبب</label>
+        <select name="reason">
+          <% Object.entries(reasonLabels).forEach(function(e) { %>
+            <option value="<%= e[0] %>" <%= e[0] === 'monthly' ? 'selected' : '' %>><%= e[1] %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">مرتبط بشهر (اختياري)</label>
+        <select name="monthly_fee_id">
+          <option value="">بدون ربط بشهر محدد</option>
+          <% balance.months.filter(m => m.status !== 'paid' && m.status !== 'exempt').forEach(function(m) { %>
+            <option value="<%= m.id %>"><%= dayjs(m.month, 'YYYY-MM').format('MMMM YYYY') %> — المتبقي <%= (Number(m.amount_due) - Number(m.amount_paid)).toLocaleString('ar') %> دج</option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">المبلغ (دج)</label>
+        <input type="number" step="0.01" min="0.01" name="amount" required />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">طريقة الدفع</label>
+        <select name="method">
+          <% Object.entries(methodLabels).forEach(function(e) { %>
+            <option value="<%= e[0] %>"><%= e[1] %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0" style="grid-column: span 2;">
+        <label class="field-label">ملاحظة (اختياري)</label>
+        <input type="text" name="note" />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-money-bill-wave"></i> تأكيد الدفعة وإصدار الوصل</button>
+  </form>
+</div>
+<% } %>
+
+<div class="card">
+  <div class="card-title">سجل الدفعات</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>التاريخ</th><th>رقم الوصل</th><th>السبب</th><th>المبلغ</th><th>الطريقة</th><th>الحالة</th><th></th></tr></thead>
+      <tbody>
+        <% payments.forEach(function(p) { %>
+          <tr>
+            <td><%= dayjs(p.created_at).format('YYYY-MM-DD HH:mm') %></td>
+            <td><%= p.receipt_number || '—' %></td>
+            <td><%= reasonLabels[p.reason] %></td>
+            <td><%= Number(p.amount).toLocaleString('ar') %> دج</td>
+            <td><%= methodLabels[p.method] %></td>
+            <td>
+              <% if (p.status === 'voided') { %><span class="badge badge-urgent">ملغاة</span>
+              <% } else { %><span class="badge badge-executed">فعّالة</span><% } %>
+            </td>
+            <td class="gap-8">
+              <a href="/finance/receipts/<%= p.id %>" class="btn btn-secondary btn-sm">الوصل</a>
+              <% if (p.status === 'active' && canVoid) { %>
+                <form method="POST" action="/finance/payments/<%= p.id %>/void" onsubmit="return confirm('سيتم إلغاء هذه الدفعة (وليس حذفها) مع تسجيل السبب. متابعة؟') && (this.reason.value = prompt('سبب الإلغاء:') || '') !== '';" style="display:inline;">
+                  <input type="hidden" name="reason" />
+                  <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-ban"></i> إلغاء</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!payments.length) { %><tr><td colspan="7" class="text-muted">لا توجد دفعات مسجّلة بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

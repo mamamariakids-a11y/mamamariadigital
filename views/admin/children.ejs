@@ -1,0 +1,83 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الأطفال</h1>
+    <div class="sub">ربط الأطفال بالفصول وأولياء الأمور لعرض متابعة الأنشطة</div>
+  </div>
+</div>
+
+<div class="grid" style="grid-template-columns: 1.6fr 1fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">قائمة الأطفال</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الاسم</th><th>الفصل</th><th>ولي الأمر</th><th></th></tr></thead>
+        <tbody>
+          <% children.forEach(function(c) { %>
+            <tr>
+              <td><a href="/admin/children/<%= c.id %>" style="font-weight:700; color:var(--color-primary-dark);"><%= c.name %></a></td>
+              <td><%= c.class_name || '—' %></td>
+              <td><%= c.parent_name || '—' %></td>
+              <td>
+                <a href="/admin/children/<%= c.id %>" class="btn btn-secondary btn-sm" title="السجل الصحي"><i class="fa-solid fa-notes-medical"></i></a>
+                <a href="/admin/children/<%= c.id %>/id-card" target="_blank" class="btn btn-secondary btn-sm" title="بطاقة تعريف QR"><i class="fa-solid fa-id-card"></i></a>
+                <a href="/finance/children/<%= c.id %>" class="btn btn-secondary btn-sm" title="الملف المالي"><i class="fa-solid fa-sack-dollar"></i></a>
+                <form method="POST" action="/admin/children/<%= c.id %>/delete" onsubmit="return confirm('حذف هذا الطفل؟');" style="display:inline;">
+                  <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (!children.length) { %><tr><td colspan="4" class="text-muted">لا يوجد أطفال مسجلون بعد</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">إضافة طفل جديد</div>
+    <form method="POST" action="/admin/children">
+      <div class="form-group">
+        <label class="field-label">اسم الطفل</label>
+        <input type="text" name="name" required />
+      </div>
+      <div class="form-group">
+        <label class="field-label">الفصل</label>
+        <select name="class_id">
+          <option value="">بدون فصل</option>
+          <% classes.forEach(function(cl) { %>
+            <option value="<%= cl.id %>"><%= cl.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">ولي الأمر</label>
+        <select name="parent_id">
+          <option value="">بدون ربط حاليًا</option>
+          <% parents.forEach(function(p) { %>
+            <option value="<%= p.id %>"><%= p.name %></option>
+          <% }) %>
+        </select>
+        <div class="form-hint">لا يوجد ولي أمر مسجّل؟ أضيفي حسابًا له من صفحة المستخدمون أولًا.</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-plus"></i> إضافة الطفل</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">استيراد عدة أطفال دفعة واحدة</div>
+    <div class="card-sub">لديك قائمة أسماء جاهزة (من ملف Excel أو برنامج آخر)؟ استوريديها دفعة واحدة بدل كتابة كل اسم يدويًا.</div>
+    <a href="/downloads/قالب_استيراد_الأطفال.xlsx" class="btn btn-secondary btn-block" style="margin-bottom:12px;"><i class="fa-solid fa-file-arrow-down"></i> تنزيل قالب Excel الجاهز</a>
+    <form method="POST" action="/admin/children/import" enctype="multipart/form-data">
+      <div class="form-group mt-0">
+        <label class="field-label">اختاري الملف بعد تعبئته (Excel أو CSV)</label>
+        <input type="file" name="import_file" accept=".xlsx,.xls,.csv" required />
+        <div class="form-hint">يجب أن يطابق اسم الفصل المكتوب في الملف اسم فصل موجود بالفعل في صفحة "الفصول".</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-file-import"></i> استيراد الآن</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

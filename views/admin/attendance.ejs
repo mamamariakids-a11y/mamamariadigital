@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الحضور والغياب</h1>
+    <div class="sub">متابعة حضور وغياب جميع الفصول</div>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="calendar-toolbar">
+    <% if (view === 'day') { %>
+      <div class="calendar-nav">
+        <a class="nav-btn" href="?view=day&date=<%= prevDate %>"><i class="fa-solid fa-chevron-right"></i></a>
+        <a class="nav-btn today-btn" href="?view=day"><span style="font-size:12px;">اليوم</span></a>
+        <a class="nav-btn" href="?view=day&date=<%= nextDate %>"><i class="fa-solid fa-chevron-left"></i></a>
+        <div class="label"><%= dayjs(date).format('dddd DD MMMM YYYY') %></div>
+      </div>
+    <% } else { %>
+      <div class="calendar-nav">
+        <a class="nav-btn" href="?view=month&month=<%= prevMonth %>"><i class="fa-solid fa-chevron-right"></i></a>
+        <a class="nav-btn today-btn" href="?view=month"><span style="font-size:12px;">هذا الشهر</span></a>
+        <a class="nav-btn" href="?view=month&month=<%= nextMonth %>"><i class="fa-solid fa-chevron-left"></i></a>
+        <div class="label"><%= monthLabel %></div>
+      </div>
+    <% } %>
+    <div class="view-switch">
+      <a class="<%= view === 'day' ? 'active' : '' %>" href="?view=day">يومي</a>
+      <a class="<%= view === 'month' ? 'active' : '' %>" href="?view=month">تقرير شهري</a>
+    </div>
+  </div>
+</div>
+
+<% if (view === 'day') { %>
+
+  <div class="grid grid-3" style="margin-bottom:6px;">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-check"></i></div>
+      <div><div class="stat-value"><%= totals.present %></div><div class="stat-label">حاضر اليوم</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-xmark"></i></div>
+      <div><div class="stat-value"><%= totals.absent %></div><div class="stat-label">غائب اليوم</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#8892B5;"><i class="fa-solid fa-question"></i></div>
+      <div><div class="stat-value"><%= totals.unmarked %></div><div class="stat-label">لم يُسجَّل بعد</div></div>
+    </div>
+  </div>
+
+  <% if (!classesToday.length) { %>
+    <div class="card"><div class="empty-state"><div class="es-icon">🏫</div><h3>لا توجد فصول أو أطفال مسجّلون بعد</h3></div></div>
+  <% } %>
+
+  <% classesToday.forEach(function(cls) { %>
+    <div class="card">
+      <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="class-dot" style="background:<%= cls.color %>;"></span> <%= cls.name %>
+      </div>
+      <div class="card-sub"><%= cls.present %> حاضر · <%= cls.absent %> غائب · <%= cls.unmarked %> لم يُسجَّل</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الطفل</th><th>الحالة</th><th>سجّلته</th></tr></thead>
+          <tbody>
+            <% cls.children.forEach(function(c) { %>
+              <tr>
+                <td><%= c.child_name %></td>
+                <td>
+                  <% if (c.status === 'present') { %><span class="badge badge-executed">✅ حاضر</span>
+                  <% } else if (c.status === 'absent') { %><span class="badge badge-urgent">❌ غائب</span>
+                  <% } else { %><span class="badge badge-normal">لم يُسجَّل</span><% } %>
+                </td>
+                <td class="text-muted"><%= c.marked_by_name || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% }) %>
+
+<% } else { %>
+
+  <% if (!classesReport.length) { %>
+    <div class="card"><div class="empty-state"><div class="es-icon">📊</div><h3>لا توجد بيانات حضور لهذا الشهر بعد</h3></div></div>
+  <% } %>
+
+  <% classesReport.forEach(function(cls) { %>
+    <div class="card">
+      <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="class-dot" style="background:<%= cls.color %>;"></span> <%= cls.name %>
+      </div>
+      <div class="card-sub">متوسط نسبة الحضور: <%= cls.rate === null ? '—' : cls.rate + '%' %></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الطفل</th><th>أيام الحضور</th><th>أيام الغياب</th><th>نسبة الحضور</th></tr></thead>
+          <tbody>
+            <% cls.children.forEach(function(c) { %>
+              <tr>
+                <td><%= c.child_name %></td>
+                <td><%= c.present_count %></td>
+                <td><%= c.absent_count %></td>
+                <td>
+                  <% if (c.rate === null) { %><span class="text-muted">—</span>
+                  <% } else { %><span class="badge <%= c.rate >= 90 ? 'badge-executed' : (c.rate >= 75 ? 'badge-important' : 'badge-urgent') %>"><%= c.rate %>%</span><% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% }) %>
+
+<% } %>
+
+<%- include('../partials/footer') %>

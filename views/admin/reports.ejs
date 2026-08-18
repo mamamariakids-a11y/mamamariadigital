@@ -1,0 +1,64 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>التقارير الشهرية</h1>
+    <div class="sub">تقرير PDF لكل فصل: نسبة الحضور، الدروس والأنشطة المنفذة، وملخص ملاحظات الأولياء</div>
+  </div>
+  <a href="/admin/reports/download?month=<%= month %>" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> تنزيل تقرير <%= monthLabel %> (PDF)</a>
+</div>
+
+<div class="card">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?month=<%= prevMonth %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?"><span style="font-size:12px;">الشهر الحالي</span></a>
+      <a class="nav-btn" href="?month=<%= nextMonth %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= monthLabel %></div>
+    </div>
+  </div>
+
+  <% if (!classes.length) { %>
+    <div class="empty-state">
+      <div class="es-icon">📄</div>
+      <h3>لا توجد بيانات حضور مسجّلة لهذا الشهر بعد</h3>
+    </div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>الفصل</th><th>المربية</th><th>عدد الأطفال</th><th>نسبة الحضور</th><th>الدروس والأنشطة المنفذة</th><th>ملاحظات الأولياء</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% classes.forEach(function(cls) { %>
+            <tr>
+              <td style="font-weight:700;"><%= cls.name %></td>
+              <td><%= cls.teacherName || '—' %></td>
+              <td><%= cls.children.length %></td>
+              <td>
+                <% if (cls.rate === null) { %>—<% } else { %>
+                  <span class="badge <%= cls.rate >= 80 ? 'badge-executed' : 'badge-urgent' %>"><%= cls.rate %>%</span>
+                <% } %>
+              </td>
+              <td><%= cls.executedItems %> / <%= cls.totalItems %></td>
+              <td><%= cls.notesSummary.done %> / <%= cls.notesSummary.total %> تم التعامل معها</td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<div class="card">
+  <div class="card-title">ماذا يحتوي التقرير؟</div>
+  <p class="text-muted" style="line-height:1.9;">
+    عند التنزيل، يُنشئ النظام ملف PDF واحدًا بصفحة مستقلة لكل فصل، تتضمن: جدول تفصيلي بأيام حضور وغياب كل طفل ونسبته الشهرية،
+    عدد الدروس والأنشطة المجدولة وما تم تنفيذه فعليًا، وملخصًا لعدد ملاحظات الأولياء التي وصلت وعدد ما تم التعامل معه.
+    التقرير جاهز للطباعة أو المشاركة مباشرة مع المربيات أو الجهات المعنية.
+  </p>
+</div>
+
+<%- include('../partials/footer') %>

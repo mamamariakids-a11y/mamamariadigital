@@ -1,0 +1,115 @@
+<!--
+  Shared health-record + emergency-contacts block, included from the admin,
+  parent, and teacher child pages. Expected locals:
+  - healthProfile: row from health_profiles, or null
+  - contacts: array of rows from emergency_contacts
+  - editable: boolean — show edit/add/delete forms, or a read-only summary
+  - actionPrefix: base path for POST forms when editable (e.g. '/admin/children/12')
+-->
+
+<div class="card mt-0">
+  <div class="card-title"><i class="fa-solid fa-notes-medical"></i> السجل الصحي</div>
+  <% if (editable) { %>
+    <form method="POST" action="<%= actionPrefix %>/health">
+      <div class="grid grid-2">
+        <div class="form-group mt-0">
+          <label class="field-label">فصيلة الدم</label>
+          <input type="text" name="blood_type" value="<%= healthProfile ? (healthProfile.blood_type || '') : '' %>" placeholder="مثال: O+" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">الحساسية (طعام / دواء)</label>
+          <input type="text" name="allergies" value="<%= healthProfile ? (healthProfile.allergies || '') : '' %>" placeholder="مثال: مكسرات، بنسلين" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">أمراض مزمنة</label>
+          <input type="text" name="chronic_conditions" value="<%= healthProfile ? (healthProfile.chronic_conditions || '') : '' %>" placeholder="مثال: ربو" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">أدوية حالية</label>
+          <input type="text" name="medications" value="<%= healthProfile ? (healthProfile.medications || '') : '' %>" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">اسم الطبيب</label>
+          <input type="text" name="doctor_name" value="<%= healthProfile ? (healthProfile.doctor_name || '') : '' %>" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">هاتف الطبيب</label>
+          <input type="tel" name="doctor_phone" value="<%= healthProfile ? (healthProfile.doctor_phone || '') : '' %>" />
+        </div>
+        <div class="form-group mt-0" style="grid-column: span 2;">
+          <label class="field-label">ملاحظات إضافية</label>
+          <textarea name="notes" rows="2"><%= healthProfile ? (healthProfile.notes || '') : '' %></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ السجل الصحي</button>
+      <% if (healthProfile && healthProfile.updated_at) { %>
+        <div class="form-hint" style="margin-top:10px;">آخر تحديث: <%= dayjs(healthProfile.updated_at).format('DD MMMM YYYY - HH:mm') %></div>
+      <% } %>
+    </form>
+  <% } else { %>
+    <% if (!healthProfile) { %>
+      <div class="empty-state"><div class="es-icon">🩺</div><h3>لا يوجد سجل صحي مسجّل بعد</h3></div>
+    <% } else { %>
+      <div class="grid grid-2">
+        <div><div class="field-label">فصيلة الدم</div><div class="text-muted"><%= healthProfile.blood_type || '—' %></div></div>
+        <div><div class="field-label">الحساسية</div><div class="text-muted"><%= healthProfile.allergies || '—' %></div></div>
+        <div><div class="field-label">أمراض مزمنة</div><div class="text-muted"><%= healthProfile.chronic_conditions || '—' %></div></div>
+        <div><div class="field-label">أدوية حالية</div><div class="text-muted"><%= healthProfile.medications || '—' %></div></div>
+        <div><div class="field-label">اسم الطبيب</div><div class="text-muted"><%= healthProfile.doctor_name || '—' %></div></div>
+        <div><div class="field-label">هاتف الطبيب</div><div class="text-muted"><%= healthProfile.doctor_phone || '—' %></div></div>
+      </div>
+      <% if (healthProfile.notes) { %><p class="text-muted" style="margin-top:12px; line-height:1.8;"><%= healthProfile.notes %></p><% } %>
+    <% } %>
+  <% } %>
+</div>
+
+<div class="card">
+  <div class="card-title"><i class="fa-solid fa-address-book"></i> جهات الاتصال في حالات الطوارئ</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الاسم</th><th>صلة القرابة</th><th>الهاتف</th><th>يمكنه الاستلام</th><% if (editable) { %><th></th><% } %></tr></thead>
+      <tbody>
+        <% contacts.forEach(function(ct) { %>
+          <tr>
+            <td><%= ct.name %></td>
+            <td><%= ct.relation || '—' %></td>
+            <td><%= ct.phone %></td>
+            <td><%= ct.can_pickup ? '✅ نعم' : '❌ لا' %></td>
+            <% if (editable) { %>
+              <td>
+                <form method="POST" action="<%= actionPrefix %>/contacts/<%= ct.id %>/delete" onsubmit="return confirm('حذف جهة الاتصال هذه؟');">
+                  <button type="submit" class="btn-icon-x"><i class="fa-solid fa-xmark"></i></button>
+                </form>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+        <% if (!contacts.length) { %><tr><td colspan="<%= editable ? 5 : 4 %>" class="text-muted">لا توجد جهات اتصال مسجّلة بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (editable) { %>
+    <div class="card-title" style="margin-top:22px;">إضافة جهة اتصال جديدة</div>
+    <form method="POST" action="<%= actionPrefix %>/contacts">
+      <div class="grid grid-3">
+        <div class="form-group mt-0">
+          <label class="field-label">الاسم</label>
+          <input type="text" name="name" required />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">صلة القرابة</label>
+          <input type="text" name="relation" placeholder="مثال: العم، الجدة" />
+        </div>
+        <div class="form-group mt-0">
+          <label class="field-label">رقم الهاتف</label>
+          <input type="tel" name="phone" required />
+        </div>
+      </div>
+      <label class="checkbox-pill" style="margin-bottom:16px;">
+        <input type="checkbox" name="can_pickup" value="1" checked /> يمكنه استلام الطفل من الروضة
+      </label>
+      <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-plus"></i> إضافة جهة الاتصال</button>
+    </form>
+  <% } %>
+</div>

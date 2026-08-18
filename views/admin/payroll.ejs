@@ -1,0 +1,153 @@
+<%- include('../partials/header') %>
+
+<%
+  const roleLabels = { admin: 'مديرة الروضة', director: 'المديرة التربوية', teacher: 'مربية', staff: 'إدارية', driver: 'سائق' };
+  const statusLbl = { unpaid: 'غير مدفوع', paid: 'مدفوع' };
+  const statusBadge = { unpaid: 'badge-urgent', paid: 'badge-executed' };
+%>
+
+<div class="page-actions">
+  <div>
+    <h1>الرواتب والسلف</h1>
+    <div class="sub">رواتب الموظفين، السلف، وإصدار كشف رواتب شهري</div>
+  </div>
+</div>
+
+<div class="grid" style="grid-template-columns: 1fr 1fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">الرواتب الأساسية</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الموظف</th><th>الدور</th><th>الراتب الأساسي</th><th>سلف قائمة</th></tr></thead>
+        <tbody>
+          <% employees.forEach(function(e) { %>
+            <tr>
+              <td style="font-weight:700;"><%= e.name %></td>
+              <td><%= roleLabels[e.role] || e.role %></td>
+              <td>
+                <form method="POST" action="/payroll/salaries/<%= e.id %>" style="display:flex; gap:6px;">
+                  <input type="number" name="base_salary" min="0" step="0.01" value="<%= e.base_salary %>" style="max-width:130px;" />
+                  <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-check"></i></button>
+                </form>
+              </td>
+              <td><%= e.unpaid_advances > 0 ? (e.unpaid_advances + ' دج') : '—' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">إضافة سلفة جديدة</div>
+    <form method="POST" action="/payroll/advances">
+      <div class="form-group">
+        <label class="field-label">الموظف</label>
+        <select name="user_id" required>
+          <% employees.forEach(function(e) { %>
+            <option value="<%= e.id %>"><%= e.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">المبلغ</label>
+        <input type="number" name="amount" min="1" step="0.01" required />
+      </div>
+      <div class="form-group">
+        <label class="field-label">السبب (اختياري)</label>
+        <input type="text" name="reason" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">التاريخ</label>
+        <input type="date" name="advance_date" value="<%= dayjs().format('YYYY-MM-DD') %>" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-plus"></i> إضافة السلفة</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">السلف</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الموظف</th><th>المبلغ</th><th>المسدد</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>
+          <% advances.forEach(function(a) { %>
+            <tr>
+              <td><%= a.employee_name %></td>
+              <td><%= a.amount %> دج</td>
+              <td><%= a.repaid_amount %> دج</td>
+              <td><span class="badge <%= a.status === 'repaid' ? 'badge-executed' : 'badge-urgent' %>"><%= a.status === 'repaid' ? 'مسددة' : 'قائمة' %></span></td>
+              <td>
+                <% if (a.status === 'unpaid') { %>
+                  <form method="POST" action="/payroll/advances/<%= a.id %>/repay" onsubmit="return confirm('تحديد هذه السلفة كمسددة بالكامل؟');">
+                    <button type="submit" class="btn btn-secondary btn-sm">تسديد كامل</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (!advances.length) { %><tr><td colspan="5" class="text-muted">لا توجد سلف</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="page-actions" style="margin-bottom:14px;">
+    <div class="card-title" style="margin:0;">كشف الرواتب</div>
+    <form method="GET" action="/payroll" style="display:flex; gap:8px;">
+      <input type="month" name="month" value="<%= month %>" onchange="this.form.submit()" />
+    </form>
+  </div>
+
+  <form method="POST" action="/payroll/generate" style="margin-bottom:16px;">
+    <input type="hidden" name="month" value="<%= month %>" />
+    <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-gears"></i> توليد كشف الرواتب لهذا الشهر</button>
+    <span class="form-hint">آمن التكرار — لن يُعاد إنشاء سجل موجود بالفعل لنفس الموظف والشهر.</span>
+  </form>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الموظف</th><th>الأساسي</th><th>مكافأة</th><th>خصم</th><th>خصم سلفة</th><th>الصافي</th><th>الحالة</th><th></th></tr></thead>
+      <tbody>
+        <% records.forEach(function(r) { %>
+          <tr>
+            <td style="font-weight:700;"><%= r.employee_name %></td>
+            <td><%= r.base_salary %></td>
+            <td>
+              <% if (r.status === 'unpaid') { %>
+                <form method="POST" action="/payroll/records/<%= r.id %>" style="display:flex; gap:4px;">
+                  <input type="number" name="bonus" step="0.01" value="<%= r.bonus %>" style="max-width:80px;" />
+              <% } else { %><%= r.bonus %><% } %>
+            </td>
+            <td>
+              <% if (r.status === 'unpaid') { %>
+                  <input type="number" name="deduction" step="0.01" value="<%= r.deduction %>" style="max-width:80px;" />
+              <% } else { %><%= r.deduction %><% } %>
+            </td>
+            <td>
+              <% if (r.status === 'unpaid') { %>
+                  <input type="number" name="advance_deduction" step="0.01" value="<%= r.advance_deduction %>" style="max-width:80px;" />
+                  <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-check"></i></button>
+                </form>
+              <% } else { %><%= r.advance_deduction %><% } %>
+            </td>
+            <td style="font-weight:800;"><%= r.net_amount %> دج</td>
+            <td><span class="badge <%= statusBadge[r.status] %>"><%= statusLbl[r.status] %></span></td>
+            <td>
+              <% if (r.status === 'unpaid') { %>
+                <form method="POST" action="/payroll/records/<%= r.id %>/pay" onsubmit="return confirm('تأكيد صرف هذا الراتب؟ لن يمكن تعديله بعد ذلك.');">
+                  <button type="submit" class="btn btn-primary btn-sm">تأكيد الصرف</button>
+                </form>
+              <% } else { %>—<% } %>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!records.length) { %><tr><td colspan="8" class="text-muted">لا يوجد كشف رواتب لهذا الشهر بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,73 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>لوحة السائق</h1>
+    <div class="sub">تسجيل صعود ونزول الأطفال في الرحلة الحالية</div>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <form method="GET" action="/driver" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap; margin-bottom:16px;">
+    <div class="form-group mt-0" style="margin-bottom:0;">
+      <label class="field-label">التاريخ</label>
+      <input type="date" name="date" value="<%= date %>" onchange="this.form.submit()" />
+    </div>
+    <div class="form-group mt-0" style="margin-bottom:0;">
+      <label class="field-label">الرحلة</label>
+      <select name="trip" onchange="this.form.submit()">
+        <option value="morning" <%= trip === 'morning' ? 'selected' : '' %>>صباحًا (ذهاب)</option>
+        <option value="evening" <%= trip === 'evening' ? 'selected' : '' %>>مساءً (عودة)</option>
+      </select>
+    </div>
+  </form>
+
+  <% if (!routes.length) { %>
+    <div class="alert alert-info">لا يوجد خط نقل مسند إليك حاليًا. يرجى مراجعة إدارة الروضة.</div>
+  <% } %>
+
+  <% routes.forEach(function(route) { %>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><%= route.name %> <span class="text-muted" style="font-weight:500; font-size:12.5px;">(<%= route.children.length %> طفل)</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الطفل</th><th>الفصل</th><th>نقطة الالتقاط</th><th>الحالة</th><th></th></tr></thead>
+          <tbody>
+            <% route.children.forEach(function(c) { %>
+              <% const statusLbl = { pending: 'بالانتظار', boarded: 'صعد', dropped: 'نزل', absent: 'غائب' }; %>
+              <% const statusBadge = { pending: 'badge-pending', boarded: 'badge-received', dropped: 'badge-executed', absent: 'badge-urgent' }; %>
+              <tr>
+                <td style="font-weight:700;"><%= c.child_name %></td>
+                <td><%= c.class_name || '—' %></td>
+                <td><%= c.pickup_point || '—' %></td>
+                <td><span class="badge <%= statusBadge[c.status] %>"><%= statusLbl[c.status] %></span></td>
+                <td>
+                  <div class="gap-8">
+                    <form method="POST" action="/driver/mark" style="display:inline;">
+                      <input type="hidden" name="child_id" value="<%= c.child_id %>" />
+                      <input type="hidden" name="route_id" value="<%= route.id %>" />
+                      <input type="hidden" name="date" value="<%= date %>" />
+                      <input type="hidden" name="trip" value="<%= trip %>" />
+                      <input type="hidden" name="status" value="<%= trip === 'morning' ? 'boarded' : 'dropped' %>" />
+                      <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-check"></i> <%= trip === 'morning' ? 'صعد' : 'نزل' %></button>
+                    </form>
+                    <form method="POST" action="/driver/mark" style="display:inline;">
+                      <input type="hidden" name="child_id" value="<%= c.child_id %>" />
+                      <input type="hidden" name="route_id" value="<%= route.id %>" />
+                      <input type="hidden" name="date" value="<%= date %>" />
+                      <input type="hidden" name="trip" value="<%= trip %>" />
+                      <input type="hidden" name="status" value="absent" />
+                      <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-xmark"></i> غائب</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<%- include('../partials/footer') %>

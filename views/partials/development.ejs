@@ -1,0 +1,30 @@
+<!--
+  Read-only pedagogical development history, shared by the admin and parent
+  child pages (the teacher has their own entry form at
+  /teacher/children/:id/development). Expected locals:
+  - assessments: rows from development_assessments, newest first
+  - domainLabels, levelLabels: label maps
+-->
+<div class="card">
+  <div class="card-title"><i class="fa-solid fa-seedling"></i> التطور البيداغوجي</div>
+  <% if (!assessments.length) { %>
+    <div class="empty-state"><div class="es-icon">🌱</div><h3>لا توجد تقييمات مسجّلة بعد</h3></div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>التاريخ</th><th>المجال</th><th>المستوى</th><th>ملاحظة</th><th>المربية</th></tr></thead>
+        <tbody>
+          <% assessments.forEach(function(a) { %>
+            <tr>
+              <td><%= dayjs(a.created_at).format('DD MMMM YYYY') %></td>
+              <td><span class="badge badge-lesson"><%= domainLabels[a.domain] %></span></td>
+              <td><span class="badge <%= a.level === 'proficient' ? 'badge-executed' : a.level === 'developing' ? 'badge-important' : 'badge-normal' %>"><%= levelLabels[a.level] %></span></td>
+              <td class="text-muted"><%= a.note || '—' %></td>
+              <td class="text-muted"><%= a.assessed_by_name || '—' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

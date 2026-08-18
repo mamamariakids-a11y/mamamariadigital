@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' | روضة ماما ماريا' : 'روضة ماما ماريا' %></title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img class="logo-img" src="/images/logo.png" alt="شعار روضة ماما ماريا" />
+      <div>
+        <div class="name">روضة ماما ماريا</div>
+        <div class="sub">نظام إدارة الأنشطة التربوية</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <% if (user && user.role === 'admin') { %>
+        <div class="nav-section-title">الإدارة العامة</div>
+        <a class="nav-link <%= currentPath === '/admin' ? 'active' : '' %>" href="/admin"><span class="icon"><i class="fa-solid fa-gauge"></i></span> لوحة التحكم</a>
+        <a class="nav-link <%= currentPath === '/admin/users' ? 'active' : '' %>" href="/admin/users"><span class="icon"><i class="fa-solid fa-users"></i></span> المستخدمون</a>
+        <a class="nav-link <%= currentPath === '/admin/classes' ? 'active' : '' %>" href="/admin/classes"><span class="icon"><i class="fa-solid fa-chalkboard"></i></span> الفصول</a>
+        <a class="nav-link <%= currentPath === '/admin/children' ? 'active' : '' %>" href="/admin/children"><span class="icon"><i class="fa-solid fa-child-reaching"></i></span> الأطفال</a>
+        <a class="nav-link <%= currentPath === '/admin/attendance' ? 'active' : '' %>" href="/admin/attendance"><span class="icon"><i class="fa-solid fa-clipboard-check"></i></span> الحضور والغياب</a>
+        <a class="nav-link <%= currentPath === '/admin/daily-reports' ? 'active' : '' %>" href="/admin/daily-reports"><span class="icon"><i class="fa-solid fa-clipboard-list"></i></span> التقرير اليومي</a>
+        <a class="nav-link <%= currentPath === '/admin/reports' ? 'active' : '' %>" href="/admin/reports"><span class="icon"><i class="fa-solid fa-file-pdf"></i></span> التقارير الشهرية</a>
+        <a class="nav-link <%= currentPath === '/admin/export' ? 'active' : '' %>" href="/admin/export"><span class="icon"><i class="fa-solid fa-file-arrow-down"></i></span> تصدير ونسخ احتياطي</a>
+        <div class="nav-section-title">المالية</div>
+        <a class="nav-link <%= currentPath.startsWith('/finance') ? 'active' : '' %>" href="/finance"><span class="icon"><i class="fa-solid fa-sack-dollar"></i></span> اللوحة المالية</a>
+        <div class="nav-section-title">التواصل والاستدعاء</div>
+        <a class="nav-link <%= currentPath === '/pickup' ? 'active' : '' %>" href="/pickup"><span class="icon"><i class="fa-solid fa-person-walking-arrow-right"></i></span> طلبات الاستدعاء</a>
+        <a class="nav-link <%= currentPath === '/admin/announcements' ? 'active' : '' %>" href="/admin/announcements"><span class="icon"><i class="fa-solid fa-bullhorn"></i></span> الإعلانات</a>
+        <a class="nav-link <%= currentPath.startsWith('/messages') ? 'active' : '' %>" href="/messages"><span class="icon"><i class="fa-solid fa-comments"></i></span> المراسلة</a>
+        <a class="nav-link <%= currentPath === '/admin/registration-requests' ? 'active' : '' %>" href="/admin/registration-requests"><span class="icon"><i class="fa-solid fa-user-plus"></i></span> طلبات التسجيل</a>
+        <a class="nav-link <%= currentPath === '/admin/audit-log' ? 'active' : '' %>" href="/admin/audit-log"><span class="icon"><i class="fa-solid fa-list-check"></i></span> سجل العمليات</a>
+        <div class="nav-section-title">النقل والرواتب</div>
+        <a class="nav-link <%= currentPath.startsWith('/transport') ? 'active' : '' %>" href="/transport"><span class="icon"><i class="fa-solid fa-bus"></i></span> النقل المدرسي</a>
+        <a class="nav-link <%= currentPath === '/payroll' ? 'active' : '' %>" href="/payroll"><span class="icon"><i class="fa-solid fa-money-check-dollar"></i></span> الرواتب والسلف</a>
+        <div class="nav-section-title">الدروس والأنشطة</div>
+        <a class="nav-link <%= currentPath === '/director' ? 'active' : '' %>" href="/director"><span class="icon"><i class="fa-solid fa-calendar-days"></i></span> التقويم التربوي</a>
+        <a class="nav-link <%= currentPath === '/director/items/new' ? 'active' : '' %>" href="/director/items/new"><span class="icon"><i class="fa-solid fa-circle-plus"></i></span> إنشاء درس/نشاط</a>
+        <a class="nav-link <%= currentPath === '/director/notes' ? 'active' : '' %>" href="/director/notes"><span class="icon"><i class="fa-solid fa-note-sticky"></i></span> ملاحظات الأولياء</a>
+      <% } %>
+
+      <% if (user && user.role === 'director') { %>
+        <div class="nav-section-title">الدروس والأنشطة</div>
+        <a class="nav-link <%= currentPath === '/director' ? 'active' : '' %>" href="/director"><span class="icon"><i class="fa-solid fa-calendar-days"></i></span> التقويم التربوي</a>
+        <a class="nav-link <%= currentPath === '/director/items/new' ? 'active' : '' %>" href="/director/items/new"><span class="icon"><i class="fa-solid fa-circle-plus"></i></span> إنشاء درس/نشاط</a>
+        <a class="nav-link <%= currentPath === '/director/notes' ? 'active' : '' %>" href="/director/notes"><span class="icon"><i class="fa-solid fa-note-sticky"></i></span> ملاحظات الأولياء</a>
+        <div class="nav-section-title">الاستدعاء والتواصل</div>
+        <a class="nav-link <%= currentPath === '/pickup' ? 'active' : '' %>" href="/pickup"><span class="icon"><i class="fa-solid fa-person-walking-arrow-right"></i></span> طلبات الاستدعاء</a>
+        <a class="nav-link <%= currentPath.startsWith('/messages') ? 'active' : '' %>" href="/messages"><span class="icon"><i class="fa-solid fa-comments"></i></span> المراسلة</a>
+        <a class="nav-link <%= currentPath === '/admin/registration-requests' ? 'active' : '' %>" href="/admin/registration-requests"><span class="icon"><i class="fa-solid fa-user-plus"></i></span> طلبات التسجيل</a>
+        <a class="nav-link <%= currentPath.startsWith('/transport') ? 'active' : '' %>" href="/transport"><span class="icon"><i class="fa-solid fa-bus"></i></span> النقل المدرسي</a>
+      <% } %>
+
+      <% if (user && user.role === 'teacher') { %>
+        <div class="nav-section-title">مربيتي</div>
+        <a class="nav-link <%= currentPath === '/teacher' ? 'active' : '' %>" href="/teacher"><span class="icon"><i class="fa-solid fa-calendar-week"></i></span> جدولي الأسبوعي</a>
+        <a class="nav-link <%= currentPath === '/teacher/attendance' ? 'active' : '' %>" href="/teacher/attendance"><span class="icon"><i class="fa-solid fa-clipboard-check"></i></span> الحضور والغياب</a>
+        <a class="nav-link <%= currentPath === '/teacher/daily-report' ? 'active' : '' %>" href="/teacher/daily-report"><span class="icon"><i class="fa-solid fa-clipboard-list"></i></span> التقرير اليومي</a>
+        <a class="nav-link <%= currentPath === '/teacher/notes' ? 'active' : '' %>" href="/teacher/notes"><span class="icon"><i class="fa-solid fa-note-sticky"></i></span> ملاحظات الأولياء</a>
+        <a class="nav-link <%= currentPath.startsWith('/messages') ? 'active' : '' %>" href="/messages"><span class="icon"><i class="fa-solid fa-comments"></i></span> المراسلة مع الأولياء</a>
+      <% } %>
+
+      <% if (user && user.role === 'parent') { %>
+        <div class="nav-section-title">متابعة طفلي</div>
+        <a class="nav-link <%= currentPath === '/parent' ? 'active' : '' %>" href="/parent"><span class="icon"><i class="fa-solid fa-heart"></i></span> أنشطة طفلي</a>
+        <% if (parentFinanceVisible) { %>
+          <a class="nav-link <%= currentPath === '/parent/finance' ? 'active' : '' %>" href="/parent/finance"><span class="icon"><i class="fa-solid fa-sack-dollar"></i></span> الجانب المالي</a>
+        <% } %>
+        <a class="nav-link <%= currentPath.startsWith('/messages') ? 'active' : '' %>" href="/messages"><span class="icon"><i class="fa-solid fa-comments"></i></span> مراسلة المربية</a>
+      <% } %>
+
+      <% if (user && user.role === 'staff') { %>
+        <div class="nav-section-title">الاستقبال</div>
+        <a class="nav-link <%= currentPath === '/staff' ? 'active' : '' %>" href="/staff"><span class="icon"><i class="fa-solid fa-note-sticky"></i></span> ملاحظات الأولياء</a>
+        <a class="nav-link <%= currentPath === '/pickup' ? 'active' : '' %>" href="/pickup"><span class="icon"><i class="fa-solid fa-person-walking-arrow-right"></i></span> طلبات الاستدعاء</a>
+      <% } %>
+
+      <% if (user && user.role === 'driver') { %>
+        <div class="nav-section-title">النقل المدرسي</div>
+        <a class="nav-link <%= currentPath === '/driver' ? 'active' : '' %>" href="/driver"><span class="icon"><i class="fa-solid fa-bus"></i></span> لوحة السائق</a>
+      <% } %>
+
+      <% if (financePermission && user.role !== 'admin') { %>
+        <div class="nav-section-title">المالية</div>
+        <a class="nav-link <%= currentPath.startsWith('/finance') ? 'active' : '' %>" href="/finance"><span class="icon"><i class="fa-solid fa-sack-dollar"></i></span> اللوحة المالية</a>
+      <% } %>
+
+      <div class="nav-section-title">عام</div>
+      <a class="nav-link <%= currentPath === '/events' ? 'active' : '' %>" href="/events"><span class="icon"><i class="fa-solid fa-champagne-glasses"></i></span> الفعاليات العامة</a>
+      <a class="nav-link <%= currentPath === '/notifications' ? 'active' : '' %>" href="/notifications">
+        <span class="icon"><i class="fa-solid fa-bell"></i></span> الإشعارات
+        <% if (unreadCount > 0) { %><span class="badge-count"><%= unreadCount %></span><% } %>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <form action="/logout" method="POST">
+        <button type="submit"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main-col">
+    <header class="topbar">
+      <div class="page-title"><%= typeof title !== 'undefined' ? title : '' %></div>
+      <div class="topbar-right">
+        <% if (user && (user.role === 'admin' || user.role === 'director')) { %>
+          <form action="/search" method="GET" class="topbar-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" placeholder="بحث عن طفل، ولي أمر، مربية..." />
+          </form>
+        <% } %>
+        <div class="bell-wrap">
+          <button class="bell-btn <%= unreadCount > 0 ? 'has-unread' : '' %>" id="bellBtn" type="button">
+            <i class="fa-solid fa-bell"></i>
+            <span class="dot"></span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="nd-header">الإشعارات</div>
+            <div id="notifList"><div class="notif-empty">جارٍ التحميل...</div></div>
+          </div>
+        </div>
+        <a href="/account/change-password" class="btn btn-secondary btn-sm" title="تغيير كلمة المرور"><i class="fa-solid fa-key"></i></a>
+        <div class="user-chip">
+          <div class="avatar" style="background: <%= user ? user.avatar_color : '#5B8DEF' %>"><%= user ? user.name.trim().charAt(0) : '' %></div>
+          <div class="meta">
+            <div class="u-name"><%= user ? user.name : '' %></div>
+            <div class="u-role">
+              <%
+                const roleLabels = { admin: 'مديرة الروضة', director: 'المديرة التربوية', teacher: 'مربية', parent: 'ولي أمر', staff: 'إدارية', driver: 'سائق' };
+              %>
+              <%= user ? roleLabels[user.role] : '' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="content">

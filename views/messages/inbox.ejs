@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>المراسلة</h1>
+    <div class="sub">تواصل مباشر بين المربية وولي الأمر بخصوص كل طفل</div>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الطفل</th><th>آخر رسالة</th><th></th></tr></thead>
+      <tbody>
+        <% children.forEach(function(c) { %>
+          <tr>
+            <td style="font-weight:700;">
+              <%= c.name %>
+              <% if (c.unread > 0) { %><span class="badge badge-urgent" style="margin-right:6px;"><%= c.unread %> جديدة</span><% } %>
+            </td>
+            <td class="text-muted"><%= c.lastMessage ? c.lastMessage.body.slice(0, 60) : 'لا توجد رسائل بعد' %></td>
+            <td><a href="/messages/<%= c.id %>" class="btn btn-secondary btn-sm">فتح المحادثة</a></td>
+          </tr>
+        <% }) %>
+        <% if (!children.length) { %><tr><td colspan="3" class="text-muted">لا يوجد أطفال متاحون للمراسلة</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

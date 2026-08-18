@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الصندوق</h1>
+    <div class="sub">سجل حركات الصندوق الكامل — دخل ومصاريف</div>
+  </div>
+  <a href="/finance" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> اللوحة المالية</a>
+</div>
+
+<div class="stat-card mt-0" style="max-width:320px;">
+  <div class="stat-icon" style="background:#8B5CF6;"><i class="fa-solid fa-vault"></i></div>
+  <div><div class="stat-value"><%= balance.toLocaleString('ar') %> دج</div><div class="stat-label">الرصيد الحالي</div></div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>التاريخ</th><th>النوع</th><th>المصدر</th><th>ملاحظة</th><th>الموظف</th><th>المبلغ</th></tr></thead>
+      <tbody>
+        <% transactions.forEach(function(t) { %>
+          <tr>
+            <td><%= dayjs(t.created_at).format('YYYY-MM-DD HH:mm') %></td>
+            <td>
+              <% if (t.type === 'income') { %><span class="badge badge-executed">دخل</span>
+              <% } else if (t.type === 'expense') { %><span class="badge badge-urgent">مصروف</span>
+              <% } else { %><span class="badge badge-lesson">رصيد افتتاحي</span><% } %>
+            </td>
+            <td class="text-muted"><%= t.ref_type || '—' %></td>
+            <td class="text-muted"><%= t.note || '—' %></td>
+            <td class="text-muted"><%= t.created_by_name || '—' %></td>
+            <td style="font-weight:800; color:<%= t.type === 'expense' ? '#D9634F' : '#1E6E6E' %>;">
+              <%= t.type === 'expense' ? '-' : '+' %><%= Number(t.amount).toLocaleString('ar') %> دج
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!transactions.length) { %><tr><td colspan="6" class="text-muted">لا توجد حركات مسجّلة بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

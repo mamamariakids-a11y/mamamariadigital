@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>التقارير المالية</h1>
+    <div class="sub">تقارير قابلة للتنزيل بصيغة Excel وPDF لأي شهر</div>
+  </div>
+  <a href="/finance" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> اللوحة المالية</a>
+</div>
+
+<div class="card mt-0">
+  <form method="GET" action="/finance/reports" style="display:flex; gap:10px; align-items:end; margin-bottom:20px;">
+    <div class="form-group mt-0" style="margin-bottom:0;">
+      <label class="field-label">الشهر</label>
+      <input type="month" name="month" value="<%= month %>" onchange="this.form.submit()" />
+    </div>
+  </form>
+
+  <div class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-file-excel"></i> التقرير المالي المفصل</div>
+      <div class="card-sub">كل معاملة إيراد ومصروف لهذا الشهر، في ملف Excel متعدد الأوراق (إيرادات، مصاريف، ملخص).</div>
+      <a href="/finance/reports/detailed.xlsx?month=<%= month %>" class="btn btn-primary btn-block"><i class="fa-solid fa-file-arrow-down"></i> تنزيل Excel</a>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-file-pdf"></i> التقرير المالي المبسط</div>
+      <div class="card-sub">ملخص أرباح وخسائر (P&L) بصفحة واحدة — الإيرادات حسب النوع والمصاريف حسب الفئة وصافي الشهر.</div>
+      <a href="/finance/reports/pl.pdf?month=<%= month %>" target="_blank" class="btn btn-primary btn-block"><i class="fa-solid fa-file-arrow-down"></i> عرض/تنزيل PDF</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

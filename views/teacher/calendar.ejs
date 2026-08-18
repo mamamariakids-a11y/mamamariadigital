@@ -1,0 +1,58 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>جدولي الأسبوعي</h1>
+    <div class="sub">الدروس والأنشطة المرسلة من المديرة التربوية لفصلك</div>
+  </div>
+  <% if (pendingCount > 0) { %>
+    <span class="badge badge-pending" style="font-size:13px; padding:8px 16px;"><i class="fa-solid fa-circle-exclamation"></i> لديك <%= pendingCount %> بانتظار الاستلام</span>
+  <% } %>
+</div>
+
+<% if (!hasClass) { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="es-icon">🏫</div>
+      <h3>لم يتم تعيين فصل لحسابك بعد</h3>
+      <p>يرجى التواصل مع إدارة الروضة لربط حسابك بأحد الفصول.</p>
+    </div>
+  </div>
+<% } else { %>
+<div class="card">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?view=<%= view %>&date=<%= prevDate %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?view=<%= view %>"><span style="font-size:12px;">اليوم</span></a>
+      <a class="nav-btn" href="?view=<%= view %>&date=<%= nextDate %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= monthLabel %></div>
+    </div>
+    <div class="view-switch">
+      <a class="<%= view === 'week' ? 'active' : '' %>" href="?view=week&date=<%= anchor %>">أسبوعي</a>
+      <a class="<%= view === 'month' ? 'active' : '' %>" href="?view=month&date=<%= anchor %>">شهري</a>
+    </div>
+  </div>
+
+  <div class="<%= view === 'week' ? 'week-grid' : 'month-grid' %>">
+    <% days.forEach(function(day) { %>
+      <div class="day-col <%= day.isToday ? 'today' : '' %> <%= (view==='month' && !day.inMonth) ? 'out-month' : '' %>">
+        <div class="day-col-head">
+          <span class="dname"><%= day.label %></span>
+          <span class="dnum"><%= day.dayNum %></span>
+        </div>
+        <% if (!day.items.length) { %>
+          <div class="day-empty">لا يوجد</div>
+        <% } %>
+        <% day.items.forEach(function(it) { %>
+          <a class="day-item type-<%= it.type %>" href="/teacher/items/<%= it.id %>">
+            <%= it.title %>
+            <span class="di-status"><%= {pending:'بانتظار الاستلام', received:'تم الاستلام', executed:'تم التنفيذ'}[it.my_status] %></span>
+          </a>
+        <% }) %>
+      </div>
+    <% }) %>
+  </div>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

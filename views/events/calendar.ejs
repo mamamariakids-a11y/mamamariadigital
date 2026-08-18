@@ -1,0 +1,95 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الفعاليات العامة</h1>
+    <div class="sub">عطلات، رحلات، اجتماعات أولياء أمور، ومناسبات الروضة — تظهر للجميع</div>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<% if (canManage) { %>
+  <div class="card">
+    <div class="card-title">إضافة فعالية جديدة</div>
+    <form method="POST" action="/events">
+      <div class="grid grid-3">
+        <div class="form-group">
+          <label class="field-label">عنوان الفعالية</label>
+          <input type="text" name="title" required placeholder="مثال: رحلة إلى الحديقة" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">التاريخ</label>
+          <input type="date" name="event_date" value="<%= anchor %>" required />
+        </div>
+        <div class="form-group">
+          <label class="field-label">النوع</label>
+          <select name="category">
+            <% Object.keys(categoryLabels).forEach(function(key) { %>
+              <option value="<%= key %>"><%= categoryLabels[key] %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">تفاصيل إضافية (اختياري)</label>
+        <input type="text" name="description" placeholder="مثال: يبدأ الساعة 9 صباحًا وينتهي 12 ظهرًا" />
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-plus"></i> إضافة الفعالية</button>
+    </form>
+  </div>
+<% } %>
+
+<div class="card">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?view=<%= view %>&date=<%= prevDate %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?view=<%= view %>"><span style="font-size:12px;">اليوم</span></a>
+      <a class="nav-btn" href="?view=<%= view %>&date=<%= nextDate %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= monthLabel %></div>
+    </div>
+    <div class="view-switch">
+      <a class="<%= view === 'week' ? 'active' : '' %>" href="?view=week&date=<%= anchor %>">أسبوعي</a>
+      <a class="<%= view === 'month' ? 'active' : '' %>" href="?view=month&date=<%= anchor %>">شهري</a>
+    </div>
+  </div>
+
+  <div class="<%= view === 'week' ? 'week-grid' : 'month-grid' %>">
+    <% days.forEach(function(day) { %>
+      <div class="day-col <%= day.isToday ? 'today' : '' %> <%= (view==='month' && !day.inMonth) ? 'out-month' : '' %>">
+        <div class="day-col-head">
+          <span class="dname"><%= day.label %></span>
+          <span class="dnum"><%= day.dayNum %></span>
+        </div>
+        <% if (!day.events.length) { %>
+          <div class="day-empty">لا يوجد</div>
+        <% } %>
+        <% day.events.forEach(function(ev) { %>
+          <div class="day-item cat-<%= ev.category %>">
+            <div class="flex-between" style="align-items:flex-start; gap:6px;">
+              <div>
+                <%= ev.title %>
+                <span class="di-status">
+                  <%= categoryLabels[ev.category] %><% if (ev.description) { %> · <%= ev.description %><% } %>
+                </span>
+              </div>
+              <% if (canManage) { %>
+                <form method="POST" action="/events/<%= ev.id %>/delete?date=<%= anchor %>" onsubmit="return confirm('حذف هذه الفعالية؟');" style="flex-shrink:0;">
+                  <button type="submit" class="btn-icon-x" title="حذف"><i class="fa-solid fa-xmark"></i></button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="event-legend">
+    <% Object.keys(categoryLabels).forEach(function(key) { %>
+      <span class="legend-item"><span class="legend-dot cat-<%= key %>"></span> <%= categoryLabels[key] %></span>
+    <% }) %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

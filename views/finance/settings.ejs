@@ -1,0 +1,131 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الإعدادات المالية</h1>
+    <div class="sub">خطط الاشتراك، الرسوم، سياسة تخفيض الإخوة، والصلاحيات المالية — بدون أي تعديل على الكود</div>
+  </div>
+  <a href="/finance" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> اللوحة المالية</a>
+</div>
+
+<div class="card mt-0">
+  <div class="card-title">الإعدادات العامة</div>
+  <form method="POST" action="/finance/settings">
+    <div class="grid grid-3">
+      <div class="form-group mt-0">
+        <label class="field-label">رسوم التسجيل الافتراضية (دج)</label>
+        <input type="number" step="0.01" name="registration_fee_default" value="<%= settings.registration_fee_default %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">يوم الاستحقاق من كل شهر</label>
+        <input type="number" min="1" max="28" name="due_day" value="<%= settings.due_day %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">مهلة السماح (أيام)</label>
+        <input type="number" min="0" name="grace_period_days" value="<%= settings.grace_period_days %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">بادئة رقم الوصل</label>
+        <input type="text" name="receipt_prefix" value="<%= settings.receipt_prefix %>" />
+        <div class="form-hint">مثال: MM تعطي أرقام وصولات مثل MM-2026-000001</div>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">العملة</label>
+        <input type="text" name="currency" value="<%= settings.currency %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">رصيد الصندوق الافتتاحي (دج)</label>
+        <input type="number" step="0.01" name="cashbox_opening_balance" value="<%= settings.cashbox_opening_balance %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">تخفيض الطفل الثاني (%)</label>
+        <input type="number" step="0.01" min="0" max="100" name="sibling_discount_2nd" value="<%= settings.sibling_discount_2nd %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">تخفيض الطفل الثالث فما فوق (%)</label>
+        <input type="number" step="0.01" min="0" max="100" name="sibling_discount_3rd" value="<%= settings.sibling_discount_3rd %>" />
+      </div>
+      <div class="form-group mt-0" style="align-self:flex-end;">
+        <label class="checkbox-pill"><input type="checkbox" name="parent_finance_visible" value="1" <%= settings.parent_finance_visible ? 'checked' : '' %> /> إظهار الجانب المالي لأولياء الأمور</label>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">خطط الاشتراك</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الاسم</th><th>السعر الشهري</th><th>الوصف</th><th>الحالة</th><th></th></tr></thead>
+      <tbody>
+        <% plans.forEach(function(p) { %>
+          <tr>
+            <td><%= p.name %></td>
+            <td><%= Number(p.price).toLocaleString('ar') %> دج</td>
+            <td class="text-muted"><%= p.description || '—' %></td>
+            <td><span class="badge <%= p.active ? 'badge-executed' : 'badge-normal' %>"><%= p.active ? 'مفعّلة' : 'موقوفة' %></span></td>
+            <td>
+              <form method="POST" action="/finance/settings/plans/<%= p.id %>/toggle" style="display:inline;">
+                <button type="submit" class="btn btn-secondary btn-sm"><%= p.active ? 'إيقاف' : 'تفعيل' %></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!plans.length) { %><tr><td colspan="5" class="text-muted">لا توجد خطط بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="section-title">إضافة خطة اشتراك جديدة</div>
+  <form method="POST" action="/finance/settings/plans" class="grid grid-3">
+    <div class="form-group mt-0"><label class="field-label">الاسم</label><input type="text" name="name" required placeholder="مثال: دوام كامل" /></div>
+    <div class="form-group mt-0"><label class="field-label">السعر الشهري (دج)</label><input type="number" step="0.01" name="price" required /></div>
+    <div class="form-group mt-0"><label class="field-label">الوصف (اختياري)</label><input type="text" name="description" /></div>
+    <div class="form-group mt-0" style="grid-column: span 3;"><button type="submit" class="btn btn-secondary"><i class="fa-solid fa-plus"></i> إضافة الخطة</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">تصنيفات المصاريف</div>
+  <div class="checkbox-grid">
+    <% categories.forEach(function(c) { %><span class="checkbox-pill"><%= c.name %></span><% }) %>
+  </div>
+  <form method="POST" action="/finance/settings/categories" class="grid grid-3" style="margin-top:16px;">
+    <div class="form-group mt-0"><label class="field-label">تصنيف جديد</label><input type="text" name="name" required /></div>
+    <div class="form-group mt-0" style="align-self:flex-end;"><button type="submit" class="btn btn-secondary btn-block"><i class="fa-solid fa-plus"></i> إضافة</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">الصلاحيات المالية</div>
+  <div class="card-sub">صلاحية مستقلة عن الدور — يمكن منحها لأي موظف (إداري، مربية...) بغض النظر عن دوره الأساسي</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الاسم</th><th>الدور</th><th>الصلاحية المالية الحالية</th><th>تغيير</th></tr></thead>
+      <tbody>
+        <% users.forEach(function(u) { %>
+          <tr>
+            <td><%= u.name %></td>
+            <td class="text-muted"><%= u.role %></td>
+            <td>
+              <% if (u.finance_permission) { %><span class="badge badge-executed"><%= financeLevelLabels[u.finance_permission] %></span>
+              <% } else { %><span class="badge badge-normal">بدون صلاحية مالية</span><% } %>
+            </td>
+            <td>
+              <form method="POST" action="/finance/settings/users/<%= u.id %>/permission" class="gap-8">
+                <select name="level" onchange="this.form.submit()">
+                  <option value="" <%= !u.finance_permission ? 'selected' : '' %>>بدون صلاحية</option>
+                  <% Object.entries(financeLevelLabels).forEach(function(e) { %>
+                    <option value="<%= e[0] %>" <%= u.finance_permission === e[0] ? 'selected' : '' %>><%= e[1] %></option>
+                  <% }) %>
+                </select>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

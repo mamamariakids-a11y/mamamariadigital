@@ -1,0 +1,32 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>سجل العمليات</h1>
+    <div class="sub">آخر 200 عملية حساسة على المنصة (دفعات، إعفاءات، تعديل سجلات صحية، تسليم أطفال...)</div>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>التاريخ</th><th>المستخدم</th><th>العملية</th><th>العنصر</th><th>تفاصيل</th></tr></thead>
+      <tbody>
+        <% logs.forEach(function(l) { %>
+          <tr>
+            <td class="text-muted" style="white-space:nowrap;"><%= dayjs(l.created_at).format('YYYY-MM-DD HH:mm') %></td>
+            <td><%= l.user_name || '—' %></td>
+            <td><span class="badge badge-lesson"><%= l.action %></span></td>
+            <td class="text-muted"><%= l.entity_type || '' %><%= l.entity_id ? ' #' + l.entity_id : '' %></td>
+            <td class="text-muted" style="max-width:340px; overflow-wrap:break-word;">
+              <%= l.details && typeof l.details === 'object' ? JSON.stringify(l.details) : (l.details || '—') %>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!logs.length) { %><tr><td colspan="5" class="text-muted">لا توجد عمليات مسجّلة بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

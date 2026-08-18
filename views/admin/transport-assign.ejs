@@ -1,0 +1,58 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>تعيين الأطفال — <%= route.name %></h1>
+    <div class="sub">ترتيب الأطفال على خط النقل ونقطة الالتقاط الخاصة بكل واحد</div>
+  </div>
+  <a href="/transport" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> رجوع للخطوط</a>
+</div>
+
+<div class="grid" style="grid-template-columns: 1.6fr 1fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">الأطفال على هذا الخط (<%= assigned.length %>)</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الطفل</th><th>الفصل</th><th>نقطة الالتقاط</th><th></th></tr></thead>
+        <tbody>
+          <% assigned.forEach(function(a) { %>
+            <tr>
+              <td style="font-weight:700;"><%= a.child_name %></td>
+              <td><%= a.class_name || '—' %></td>
+              <td><%= a.pickup_point || '—' %></td>
+              <td>
+                <form method="POST" action="/transport/<%= route.id %>/unassign/<%= a.child_id %>" onsubmit="return confirm('إزالة هذا الطفل من الخط؟');">
+                  <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-xmark"></i></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (!assigned.length) { %><tr><td colspan="4" class="text-muted">لا يوجد أطفال معيّنون بعد</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">إضافة طفل إلى الخط</div>
+    <form method="POST" action="/transport/<%= route.id %>/assign">
+      <div class="form-group">
+        <label class="field-label">الطفل</label>
+        <select name="child_id" required>
+          <option value="">اختاري طفلاً</option>
+          <% unassigned.forEach(function(c) { %>
+            <option value="<%= c.id %>"><%= c.name %> <% if (c.class_name) { %>(<%= c.class_name %>)<% } %></option>
+          <% }) %>
+        </select>
+        <% if (!unassigned.length) { %><div class="form-hint">كل الأطفال معيّنون على خطوط بالفعل.</div><% } %>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">نقطة الالتقاط (اختياري)</label>
+        <input type="text" name="pickup_point" placeholder="مثال: أمام الصيدلية المركزية" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-plus"></i> إضافة</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

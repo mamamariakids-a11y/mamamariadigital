@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>المتأخرات</h1>
+    <div class="sub">الاستحقاقات الشهرية التي تجاوزت تاريخ الاستحقاق ولم تُسدَّد بالكامل</div>
+  </div>
+  <a href="/finance" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> اللوحة المالية</a>
+</div>
+
+<div class="card mt-0">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الطفل</th><th>الفصل</th><th>هاتف ولي الأمر</th><th>الشهر</th><th>المستحق</th><th>المدفوع</th><th>المتبقي</th><th>أيام التأخير</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(r) { %>
+          <tr>
+            <td><%= r.child_name %></td>
+            <td><%= r.class_name || '—' %></td>
+            <td><%= r.parent_phone || '—' %></td>
+            <td><%= dayjs(r.month, 'YYYY-MM').format('MMMM YYYY') %></td>
+            <td><%= Number(r.amount_due).toLocaleString('ar') %> دج</td>
+            <td><%= Number(r.amount_paid).toLocaleString('ar') %> دج</td>
+            <td><span class="badge badge-urgent"><%= (Number(r.amount_due) - Number(r.amount_paid)).toLocaleString('ar') %> دج</span></td>
+            <td><%= r.days_overdue %> يوم</td>
+            <td><a href="/finance/children/<%= r.child_id %>" class="btn btn-secondary btn-sm">فتح الملف</a></td>
+          </tr>
+        <% }) %>
+        <% if (!rows.length) { %><tr><td colspan="9" class="text-muted">لا توجد متأخرات حاليًا 🎉</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

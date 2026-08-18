@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+<%
+  const roleLabels = { admin: 'مديرة الروضة', director: 'المديرة التربوية', teacher: 'مربية', parent: 'ولي أمر', staff: 'إدارية', driver: 'سائق' };
+  const roleColors = { admin: 'badge-urgent', director: 'badge-received', teacher: 'badge-executed', parent: 'badge-normal', staff: 'badge-important', driver: 'badge-lesson' };
+%>
+
+<div class="page-actions">
+  <div>
+    <h1>المستخدمون</h1>
+    <div class="sub">إدارة حسابات المديرة التربوية، المربيات، وأولياء الأمور</div>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<div class="grid" style="grid-template-columns: 1.6fr 1fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">قائمة المستخدمين</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الدور</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>
+          <% users.forEach(function(u) { %>
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="avatar sm" style="background: <%= u.avatar_color %>;"><%= u.name.trim().charAt(0) %></div>
+                  <%= u.name %>
+                </div>
+              </td>
+              <td><%= u.email %></td>
+              <td><span class="badge <%= roleColors[u.role] %>"><%= roleLabels[u.role] %></span></td>
+              <td>
+                <% if (u.active) { %><span class="badge badge-executed">نشط</span><% } else { %><span class="badge badge-pending">موقوف</span><% } %>
+              </td>
+              <td>
+                <div class="gap-8">
+                  <form method="POST" action="/admin/users/<%= u.id %>/toggle">
+                    <button type="submit" class="btn btn-secondary btn-sm"><%= u.active ? 'إيقاف' : 'تفعيل' %></button>
+                  </form>
+                  <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('حذف هذا المستخدم نهائيًا؟');">
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <div class="form-hint" style="margin-top:14px;">
+      لمنح صلاحية مالية (محاسب أو سكرتيرة تسجيل دفعات) لأي مستخدم هنا بغض النظر عن دوره،
+      <a href="/finance/settings" style="color:var(--color-primary-dark); font-weight:700;">من صفحة الإعدادات المالية</a>.
+    </div>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">إضافة مستخدم جديد</div>
+    <form method="POST" action="/admin/users">
+      <div class="form-group">
+        <label class="field-label">الاسم الكامل</label>
+        <input type="text" name="name" required value="<%= formData ? formData.name : '' %>" />
+      </div>
+      <div class="form-group">
+        <label class="field-label">البريد الإلكتروني</label>
+        <input type="email" name="email" required value="<%= formData ? formData.email : '' %>" />
+      </div>
+      <div class="form-group">
+        <label class="field-label">كلمة المرور</label>
+        <input type="password" name="password" required />
+      </div>
+      <div class="form-group">
+        <label class="field-label">رقم الهاتف (اختياري)</label>
+        <input type="tel" name="phone" value="<%= formData ? formData.phone : '' %>" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">الدور</label>
+        <select name="role" required>
+          <option value="director">المديرة التربوية</option>
+          <option value="teacher">مربية</option>
+          <option value="parent">ولي أمر</option>
+          <option value="staff">إدارية (استقبال)</option>
+          <option value="driver">سائق النقل المدرسي</option>
+          <option value="admin">مديرة الروضة (إدارة عامة)</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-user-plus"></i> إضافة المستخدم</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,104 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>نتيجة الاستيراد</h1>
+    <div class="sub">ملخص استيراد قائمة الأطفال من الملف</div>
+  </div>
+  <a href="/admin/children" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> رجوع لقائمة الأطفال</a>
+</div>
+
+<% if (fileError) { %>
+  <div class="card mt-0">
+    <div class="alert alert-danger" style="margin-bottom:0;"><%= fileError %></div>
+  </div>
+<% } else { %>
+
+  <div class="grid grid-3" style="margin-bottom:6px;">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-check"></i></div>
+      <div><div class="stat-value"><%= summary.added.length %></div><div class="stat-label">تمت إضافتهم بنجاح</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#8892B5;"><i class="fa-solid fa-clone"></i></div>
+      <div><div class="stat-value"><%= summary.skipped.length %></div><div class="stat-label">تم تخطيهم (موجودون مسبقًا)</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div><div class="stat-value"><%= summary.errors.length %></div><div class="stat-label">أسطر بها مشكلة</div></div>
+    </div>
+  </div>
+
+  <% if (summary.newParents.length) { %>
+    <div class="card">
+      <div class="card-title">حسابات أولياء أمور جديدة تم إنشاؤها (<%= summary.newParents.length %>)</div>
+      <div class="card-sub">شاركي كل ولي أمر ببريده وكلمة المرور المؤقتة هذه ليسجّل دخوله ثم يغيّرها بنفسه من أيقونة المفتاح 🔑.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>كلمة المرور المؤقتة</th></tr></thead>
+          <tbody>
+            <% summary.newParents.forEach(function(p) { %>
+              <tr><td><%= p.name %></td><td><%= p.email %></td><td><code><%= p.password %></code></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <% if (summary.added.length) { %>
+    <div class="card">
+      <div class="card-title">الأطفال الذين تمت إضافتهم</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الاسم</th><th>الفصل</th><th>ملاحظة</th></tr></thead>
+          <tbody>
+            <% summary.added.forEach(function(a) { %>
+              <tr>
+                <td><%= a.name %></td>
+                <td><%= a.className %></td>
+                <td class="text-muted"><%= a.parentNote || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <% if (summary.errors.length) { %>
+    <div class="card">
+      <div class="card-title">أسطر لم تُستورد</div>
+      <div class="card-sub">صحّحي هذه الأسطر في الملف وأعيدي استيراده — الأسطر التي نجحت لن تتكرر.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>رقم السطر في الملف</th><th>السبب</th></tr></thead>
+          <tbody>
+            <% summary.errors.forEach(function(e) { %>
+              <tr><td><%= e.rowNum %></td><td class="text-muted"><%= e.reason %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <% if (summary.skipped.length) { %>
+    <div class="card">
+      <div class="card-title">أسطر تم تخطيها</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>رقم السطر في الملف</th><th>السبب</th></tr></thead>
+          <tbody>
+            <% summary.skipped.forEach(function(s) { %>
+              <tr><td><%= s.rowNum %></td><td class="text-muted"><%= s.reason %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+<% } %>
+
+<%- include('../partials/footer') %>

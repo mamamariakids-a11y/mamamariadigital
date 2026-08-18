@@ -1,0 +1,104 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>التقرير اليومي</h1>
+    <div class="sub">سجّلي الوجبات والقيلولة والحالة المزاجية والحمام لكل طفل — يظهر مباشرة لولي الأمر</div>
+  </div>
+</div>
+
+<% if (!classes.length) { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="es-icon">🏫</div>
+      <h3>لم يتم تعيين فصل لحسابك بعد</h3>
+      <p>يرجى التواصل مع إدارة الروضة لربط حسابك بأحد الفصول.</p>
+    </div>
+  </div>
+<% } else { %>
+
+<div class="card mt-0">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?class_id=<%= activeClass.id %>&date=<%= dayjs(date).subtract(1,'day').format('YYYY-MM-DD') %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?class_id=<%= activeClass.id %>"><span style="font-size:12px;">اليوم</span></a>
+      <a class="nav-btn" href="?class_id=<%= activeClass.id %>&date=<%= dayjs(date).add(1,'day').format('YYYY-MM-DD') %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= dayjs(date).format('dddd DD MMMM YYYY') %></div>
+    </div>
+    <% if (classes.length > 1) { %>
+      <div class="view-switch">
+        <% classes.forEach(function(c) { %>
+          <a class="<%= c.id === activeClass.id ? 'active' : '' %>" href="?class_id=<%= c.id %>&date=<%= date %>"><%= c.name %></a>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <% if (!children.length) { %>
+    <div class="empty-state">
+      <div class="es-icon">👶</div>
+      <h3>لا يوجد أطفال مسجّلون في هذا الفصل بعد</h3>
+    </div>
+  <% } else { %>
+    <div class="flex-between" style="margin-bottom:14px;">
+      <span class="text-muted" style="font-size:13px;"><%= filledCount %> من <%= children.length %> تم تعبئة تقريرهم</span>
+    </div>
+
+    <form method="POST" action="/teacher/daily-report">
+      <input type="hidden" name="class_id" value="<%= activeClass.id %>" />
+      <input type="hidden" name="date" value="<%= date %>" />
+
+      <% children.forEach(function(c) { const r = c.report || {}; %>
+        <div class="dr-card">
+          <div class="dr-header">
+            <div style="font-weight:800;font-size:15px;"><%= c.name %></div>
+            <a href="/teacher/children/<%= c.id %>/health" class="btn btn-secondary btn-sm" title="السجل الصحي"><i class="fa-solid fa-notes-medical"></i> السجل الصحي</a>
+          </div>
+          <div class="grid grid-2">
+            <div class="form-group mt-0">
+              <label class="field-label">🍽️ الوجبات</label>
+              <div class="radio-row">
+                <label><input type="radio" name="meal_<%= c.id %>" value="all" <%= r.meal_status === 'all' ? 'checked' : '' %> /><span>أكل الكل</span></label>
+                <label><input type="radio" name="meal_<%= c.id %>" value="some" <%= r.meal_status === 'some' ? 'checked' : '' %> /><span>أكل جزءًا</span></label>
+                <label><input type="radio" name="meal_<%= c.id %>" value="none" <%= r.meal_status === 'none' ? 'checked' : '' %> /><span>لم يأكل</span></label>
+              </div>
+            </div>
+            <div class="form-group mt-0">
+              <label class="field-label">الحالة المزاجية</label>
+              <div class="radio-row">
+                <label><input type="radio" name="mood_<%= c.id %>" value="happy" <%= r.mood === 'happy' ? 'checked' : '' %> /><span>😊 سعيد</span></label>
+                <label><input type="radio" name="mood_<%= c.id %>" value="normal" <%= r.mood === 'normal' ? 'checked' : '' %> /><span>😐 عادي</span></label>
+                <label><input type="radio" name="mood_<%= c.id %>" value="tired" <%= r.mood === 'tired' ? 'checked' : '' %> /><span>😴 متعب</span></label>
+                <label><input type="radio" name="mood_<%= c.id %>" value="upset" <%= r.mood === 'upset' ? 'checked' : '' %> /><span>😢 منزعج</span></label>
+              </div>
+            </div>
+            <div class="form-group mt-0">
+              <label class="field-label">😴 القيلولة</label>
+              <div class="radio-row" style="max-width:220px;">
+                <label><input type="radio" name="nap_<%= c.id %>" value="yes" <%= r.nap_status === 'yes' ? 'checked' : '' %> /><span>نام</span></label>
+                <label><input type="radio" name="nap_<%= c.id %>" value="no" <%= r.nap_status === 'no' ? 'checked' : '' %> /><span>لم ينم</span></label>
+              </div>
+            </div>
+            <div class="form-group mt-0">
+              <label class="field-label">مدة القيلولة (دقيقة)</label>
+              <input type="number" min="0" name="nap_minutes_<%= c.id %>" value="<%= r.nap_minutes || '' %>" />
+            </div>
+            <div class="form-group mt-0">
+              <label class="field-label">🚽 عدد مرات الحمام</label>
+              <input type="number" min="0" name="bathroom_<%= c.id %>" value="<%= r.bathroom_count || '' %>" />
+            </div>
+            <div class="form-group mt-0" style="grid-column: span 2;">
+              <label class="field-label">ملاحظات إضافية</label>
+              <textarea name="notes_<%= c.id %>" rows="2"><%= r.notes || '' %></textarea>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+
+      <button type="submit" class="btn btn-primary" style="margin-top:6px;"><i class="fa-solid fa-floppy-disk"></i> حفظ التقرير اليومي</button>
+    </form>
+  <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

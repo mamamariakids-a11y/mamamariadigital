@@ -1,0 +1,134 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>ملاحظات وتوصيات الأولياء</h1>
+    <div class="sub">سجّلي أي توصية أو ملاحظة يخبرك بها ولي الأمر لتصل فورًا للمربية والإدارة</div>
+  </div>
+  <div id="noteAlerts" class="note-alerts-bar">
+    <button type="button" id="noteSoundToggle" class="btn btn-secondary btn-sm"><i class="fa-solid fa-volume-xmark"></i> فعّلي التنبيه الصوتي</button>
+  </div>
+</div>
+
+<div id="noteAlertBanner" class="note-alert-banner">
+  <div class="na-icon"><i class="fa-solid fa-bell"></i></div>
+  <div>
+    <div class="na-title">ملاحظات تقترب وقت تنفيذها</div>
+    <div id="noteAlertList"></div>
+  </div>
+</div>
+
+<script type="application/json" id="noteAlertsData">
+<%- JSON.stringify(notes.filter(n => n.status === 'pending' && n.note_time).map(n => ({
+  id: n.id, note_type: n.note_type, note_date: n.note_date, note_time: n.note_time,
+  child_name: n.child_name, content: n.content
+}))) %>
+</script>
+
+<div class="grid" style="grid-template-columns: 1fr 1.4fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">إضافة ملاحظة جديدة</div>
+
+    <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+    <form method="POST" action="/staff/notes">
+      <div class="form-group">
+        <label class="field-label">الطفل</label>
+        <select name="child_id" required>
+          <option value="">اختاري الطفل</option>
+          <%
+            let lastClass = null;
+            children.forEach(function(c) {
+              if (c.class_name !== lastClass) {
+                if (lastClass !== null) { %></optgroup><% }
+                %><optgroup label="<%= c.class_name %>"><%
+                lastClass = c.class_name;
+              }
+          %>
+              <option value="<%= c.id %>"><%= c.name %></option>
+          <% }) %>
+          <% if (children.length) { %></optgroup><% } %>
+        </select>
+        <% if (!children.length) { %><div class="form-hint">لا يوجد أطفال مسجّلون في فصول بعد.</div><% } %>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">مدة الملاحظة</label>
+        <div class="radio-row">
+          <label><input type="radio" name="note_type" value="daily" checked /><span>ليوم واحد</span></label>
+          <label><input type="radio" name="note_type" value="permanent" /><span>دائمة</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">التاريخ (لملاحظة اليوم الواحد فقط)</label>
+        <input type="date" name="note_date" value="<%= today %>" />
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">وقت التنبيه (اختياري)</label>
+        <input type="time" name="note_time" />
+        <div class="form-hint">إن حددتِ وقتًا، ستصل المربية تنبيهًا صوتيًا عند اقترابه (مثال: موعد دواء الساعة 12:00).</div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">النوع</label>
+        <select name="category">
+          <option value="health">💊 صحة/دواء</option>
+          <option value="food">🍽️ طعام</option>
+          <option value="transport">🚌 نقل</option>
+          <option value="other" selected>📝 أخرى</option>
+        </select>
+      </div>
+
+      <div class="form-group mt-0">
+        <label class="field-label">نص الملاحظة</label>
+        <textarea name="content" required placeholder="مثال: يحتاج جرعة الدواء الساعة 12 ظهرًا، أو: يذهب اليوم مع الحافلة المدرسية."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-paper-plane"></i> إرسال الملاحظة</button>
+    </form>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">الملاحظات النشطة الآن (<%= notes.length %>)</div>
+    <div class="card-sub">ملاحظات اليوم + الملاحظات الدائمة غير المؤرشفة</div>
+
+    <% if (!notes.length) { %>
+      <div class="empty-state">
+        <div class="es-icon">📝</div>
+        <h3>لا توجد ملاحظات نشطة حاليًا</h3>
+      </div>
+    <% } else { %>
+      <% notes.forEach(function(n) { %>
+        <div class="assign-row" style="align-items:flex-start;">
+          <div class="a-left" style="align-items:flex-start;">
+            <span class="class-dot" style="background:<%= n.class_color %>; margin-top:6px;"></span>
+            <div>
+              <div style="font-weight:700;"><%= n.child_name %> <span class="text-muted" style="font-weight:400;">— <%= n.class_name %></span></div>
+              <div style="margin:6px 0;"><%= n.content %></div>
+              <div class="text-muted" style="font-size:12px;">
+                <%= categoryLabels[n.category] %> ·
+                <%= n.note_type === 'daily' ? 'ملاحظة اليوم' : 'ملاحظة دائمة' %>
+                <% if (n.note_time) { %> · <i class="fa-solid fa-bell"></i> <%= n.note_time %><% } %> ·
+                بواسطة <%= n.created_by_name || '—' %>
+                <% if (n.status === 'done') { %> · اطّلعت عليها <%= n.done_by_name || 'المربية' %><% } %>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge <%= n.status === 'done' ? 'badge-executed' : 'badge-urgent' %>">
+              <span class="badge-dot"></span> <%= n.status === 'done' ? 'تم الاطلاع' : 'بانتظار الاطلاع' %>
+            </span>
+            <form method="POST" action="/staff/notes/<%= n.id %>/delete" onsubmit="return confirm('حذف/أرشفة هذه الملاحظة؟');">
+              <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<script src="/js/note-alerts.js"></script>
+<%- include('../partials/footer') %>

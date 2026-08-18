@@ -1,0 +1,32 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>المراسلة — <%= child.name %></h1>
+    <div class="sub">محادثة مباشرة بخصوص هذا الطفل</div>
+  </div>
+  <a href="/messages" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> رجوع للقائمة</a>
+</div>
+
+<div class="card mt-0">
+  <div class="chat-thread" style="display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto; padding:4px 2px 12px;">
+    <% messages.forEach(function(m) { %>
+      <% const mine = m.sender_id === user.id; %>
+      <div style="max-width:70%; align-self: <%= mine ? 'flex-start' : 'flex-end' %>;">
+        <div style="background: <%= mine ? 'var(--color-primary-light)' : '#F1F2F7' %>; border-radius:12px; padding:10px 14px;">
+          <div style="font-size:12px; font-weight:700; color:var(--color-primary-dark); margin-bottom:4px;"><%= m.sender_name %></div>
+          <div style="white-space:pre-wrap;"><%= m.body %></div>
+        </div>
+        <div class="text-muted" style="font-size:11px; margin-top:3px;"><%= dayjs(m.created_at).format('DD/MM/YYYY HH:mm') %></div>
+      </div>
+    <% }) %>
+    <% if (!messages.length) { %><div class="text-muted">لا توجد رسائل بعد — ابدئي المحادثة.</div><% } %>
+  </div>
+
+  <form method="POST" action="/messages/<%= child.id %>" style="display:flex; gap:10px; margin-top:16px;">
+    <input type="text" name="body" placeholder="اكتبي رسالتك هنا..." required style="flex:1;" />
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> إرسال</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

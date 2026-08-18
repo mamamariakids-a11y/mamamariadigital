@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول | روضة ماما ماريا</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <img class="logo-img" src="/images/logo.png" alt="شعار روضة ماما ماريا" />
+        <h1>روضة ماما ماريا</h1>
+        <p>نظام إدارة الدروس والأنشطة التربوية</p>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <label class="field-label">البريد الإلكتروني</label>
+          <input type="email" name="email" required autofocus placeholder="example@mamamaria.test" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">كلمة المرور</label>
+          <input type="password" name="password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">تسجيل الدخول</button>
+      </form>
+
+      <div style="text-align:center; margin-top:14px;">
+        <a href="/register" style="color:var(--color-primary-dark); font-weight:700; font-size:13.5px;">ولي أمر جديد؟ اطلب حسابًا من هنا</a>
+      </div>
+
+      <details class="demo-accounts">
+        <summary>حسابات تجريبية للاختبار</summary>
+        <table>
+          <tbody>
+            <tr><td><strong>المديرة التربوية</strong></td><td>director@mamamaria.test</td><td>Director@123</td></tr>
+            <tr><td><strong>مربية (البراعم)</strong></td><td>teacher1@mamamaria.test</td><td>Teacher@123</td></tr>
+            <tr><td><strong>مربية (الفراشات)</strong></td><td>teacher2@mamamaria.test</td><td>Teacher@123</td></tr>
+            <tr><td><strong>ولي أمر</strong></td><td>parent1@mamamaria.test</td><td>Parent@123</td></tr>
+            <tr><td><strong>إدارية (استقبال)</strong></td><td>staff1@mamamaria.test</td><td>Staff@123</td></tr>
+            <tr><td><strong>سائق الحافلة</strong></td><td>driver1@mamamaria.test</td><td>Driver@123</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </div>
+  </div>
+</body>
+</html>

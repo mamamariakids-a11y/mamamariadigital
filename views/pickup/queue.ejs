@@ -1,0 +1,82 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>طلبات الاستدعاء</h1>
+    <div class="sub">بانتظار التسليم: <span id="pickupPendingCount"><%= pending.length %></span></div>
+  </div>
+</div>
+
+<div class="note-alert-banner pickup-banner" id="pickupNewBanner">
+  <div class="na-icon">🚸</div>
+  <div style="flex:1;">
+    <div class="na-title">وصل طلب استدعاء جديد</div>
+    <div class="note-alert-item">اضغطي لتحديث القائمة وعرض الطلب الجديد.</div>
+  </div>
+  <button type="button" class="btn btn-primary btn-sm" onclick="location.reload()">تحديث الآن</button>
+</div>
+
+<% if (!pending.length) { %>
+  <div class="card mt-0"><div class="empty-state"><div class="es-icon">🌸</div><h3>لا توجد طلبات استدعاء قيد الانتظار حاليًا</h3></div></div>
+<% } else { %>
+  <div class="grid grid-2" style="margin-top:0;">
+    <% pending.forEach(function(p) { %>
+      <div class="card mt-0" data-pickup-id="<%= p.id %>">
+        <div class="flex-between">
+          <div>
+            <div class="card-title mt-0"><%= p.child_name %></div>
+            <div class="card-sub" style="margin-bottom:0;">
+              <span class="class-dot" style="background:<%= p.class_color || '#99A2B8' %>; display:inline-block; margin-left:4px;"></span>
+              <%= p.class_name || 'بدون فصل' %>
+            </div>
+          </div>
+          <span class="badge badge-important"><i class="fa-regular fa-clock"></i> <%= dayjs(p.requested_at).format('HH:mm') %></span>
+        </div>
+        <p class="text-muted" style="margin:10px 0;">
+          <i class="fa-solid fa-user"></i> ولي الأمر: <%= p.parent_name %><% if (p.parent_phone) { %> — <%= p.parent_phone %><% } %>
+        </p>
+
+        <% if (authorized[p.child_id] && authorized[p.child_id].length) { %>
+          <div class="form-hint" style="margin-bottom:10px;">
+            الأشخاص المصرّح لهم بالاستلام:
+            <% authorized[p.child_id].forEach(function(a) { %>
+              <span class="badge badge-normal" style="margin-inline-start:4px;"><%= a.name %> (<%= a.relation || '—' %>)</span>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <form method="POST" action="/pickup/<%= p.id %>/deliver" class="gap-8" style="margin-bottom:8px;">
+          <input type="text" name="delivered_to_name" placeholder="اسم المستلم الفعلي..." required style="flex:1;" />
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-hand-holding-heart"></i> تأكيد التسليم</button>
+        </form>
+        <form method="POST" action="/pickup/<%= p.id %>/cancel" onsubmit="return confirm('إلغاء طلب الاستدعاء هذا؟');">
+          <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-xmark"></i> إلغاء الطلب</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<div class="section-title">تم تسليمهم اليوم</div>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الطفل</th><th>الفصل</th><th>الوقت</th><th>سُلِّم إلى</th><th>بواسطة</th></tr></thead>
+      <tbody>
+        <% delivered.forEach(function(d) { %>
+          <tr>
+            <td><%= d.child_name %></td>
+            <td class="text-muted"><%= d.class_name || '—' %></td>
+            <td class="text-muted"><%= dayjs(d.delivered_at).format('HH:mm') %></td>
+            <td><%= d.delivered_to_name %></td>
+            <td class="text-muted"><%= d.delivered_by_name || '—' %></td>
+          </tr>
+        <% }) %>
+        <% if (!delivered.length) { %><tr><td colspan="5" class="text-muted">لم يتم تسليم أي طفل بعد اليوم</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/js/pickup-poll.js"></script>
+<%- include('../partials/footer') %>

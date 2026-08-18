@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1><%= child.name %></h1>
+    <div class="sub"><%= child.class_name || 'بدون فصل' %> · ولي الأمر: <%= child.parent_name || 'غير مربوط' %></div>
+  </div>
+  <div class="gap-8">
+    <a href="/admin/children/<%= child.id %>/id-card" target="_blank" class="btn btn-secondary"><i class="fa-solid fa-id-card"></i> بطاقة تعريف (QR)</a>
+    <a href="/finance/children/<%= child.id %>" class="btn btn-secondary"><i class="fa-solid fa-sack-dollar"></i> الملف المالي</a>
+    <a href="/admin/children" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> عودة لقائمة الأطفال</a>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="card-title">البيانات الأساسية</div>
+  <form method="POST" action="/admin/children/<%= child.id %>">
+    <div class="grid grid-3">
+      <div class="form-group mt-0">
+        <label class="field-label">اسم الطفل</label>
+        <input type="text" name="name" value="<%= child.name %>" required />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">الفصل</label>
+        <select name="class_id">
+          <option value="">بدون فصل</option>
+          <% classes.forEach(function(cl) { %>
+            <option value="<%= cl.id %>" <%= child.class_id === cl.id ? 'selected' : '' %>><%= cl.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">ولي الأمر</label>
+        <select name="parent_id">
+          <option value="">بدون ربط حاليًا</option>
+          <% parents.forEach(function(p) { %>
+            <option value="<%= p.id %>" <%= child.parent_id === p.id ? 'selected' : '' %>><%= p.name %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> حفظ البيانات الأساسية</button>
+  </form>
+</div>
+
+<%- include('../partials/health-record', { healthProfile, contacts, editable, actionPrefix }) %>
+
+<%- include('../partials/development', { assessments, domainLabels, levelLabels }) %>
+
+<%- include('../partials/footer') %>

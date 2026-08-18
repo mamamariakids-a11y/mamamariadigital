@@ -1,0 +1,78 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الجانب المالي</h1>
+    <div class="sub">وضعية الاشتراكات والدفعات الخاصة بأبنائك فقط</div>
+  </div>
+</div>
+
+<% if (hasMultiple) { %>
+  <div class="grid grid-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-sack-dollar"></i></div>
+      <div><div class="stat-value"><%= familyDue.toLocaleString('ar') %> دج</div><div class="stat-label">إجمالي المستحق (كل الأبناء)</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-circle-check"></i></div>
+      <div><div class="stat-value"><%= familyPaid.toLocaleString('ar') %> دج</div><div class="stat-label">إجمالي المدفوع</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div><div class="stat-value"><%= familyRemaining.toLocaleString('ar') %> دج</div><div class="stat-label">المتبقي إجماليًا</div></div>
+    </div>
+  </div>
+<% } %>
+
+<% perChild.forEach(function(pc) { %>
+  <div class="card">
+    <div class="flex-between">
+      <div class="card-title mt-0"><%= pc.child.name %></div>
+      <span class="badge <%= pc.balance.totalRemaining > 0 ? 'badge-urgent' : 'badge-executed' %>">
+        المتبقي: <%= pc.balance.totalRemaining.toLocaleString('ar') %> دج
+      </span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الشهر</th><th>المستحق</th><th>المدفوع</th><th>الحالة</th></tr></thead>
+        <tbody>
+          <% pc.balance.months.forEach(function(m) { %>
+            <tr>
+              <td><%= dayjs(m.month, 'YYYY-MM').format('MMMM YYYY') %></td>
+              <td><%= Number(m.amount_due).toLocaleString('ar') %> دج</td>
+              <td><%= Number(m.amount_paid).toLocaleString('ar') %> دج</td>
+              <td><span class="badge"><%= feeStatusLabels[m.status] %></span></td>
+            </tr>
+          <% }) %>
+          <% if (!pc.balance.months.length) { %><tr><td colspan="4" class="text-muted">لا توجد استحقاقات مسجّلة بعد</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">آخر الوصولات</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>رقم الوصل</th><th>التاريخ</th><th>السبب</th><th>المبلغ</th><th></th></tr></thead>
+        <tbody>
+          <% pc.receipts.forEach(function(r) { %>
+            <tr>
+              <td><%= r.receipt_number %></td>
+              <td><%= dayjs(r.created_at).format('YYYY-MM-DD') %></td>
+              <td><%= reasonLabels[r.reason] %></td>
+              <td><%= Number(r.amount).toLocaleString('ar') %> دج</td>
+              <td><a href="/finance/receipts/<%= r.payment_id %>/pdf" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-file-pdf"></i> عرض</a></td>
+            </tr>
+          <% }) %>
+          <% if (!pc.receipts.length) { %><tr><td colspan="5" class="text-muted">لا توجد دفعات مسجّلة بعد</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% }) %>
+
+<% if (!perChild.length) { %>
+  <div class="card"><div class="empty-state"><div class="es-icon">👶</div><h3>لا يوجد أبناء مرتبطون بحسابك بعد</h3></div></div>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,74 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الفصول</h1>
+    <div class="sub">إدارة الفصول وربطها بالمربيات المسؤولات</div>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<div class="grid" style="grid-template-columns: 1.6fr 1fr; align-items:start;">
+  <div class="card mt-0">
+    <div class="card-title">قائمة الفصول</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الفصل</th><th>الفئة العمرية</th><th>المربية</th><th>عدد الأطفال</th><th></th></tr></thead>
+        <tbody>
+          <% classes.forEach(function(c) { %>
+            <tr>
+              <td><span class="class-dot" style="background:<%= c.color %>; display:inline-block; margin-left:6px;"></span><%= c.name %></td>
+              <td><%= c.age_range || '—' %></td>
+              <td>
+                <form method="POST" action="/admin/classes/<%= c.id %>" style="display:flex; gap:6px;">
+                  <input type="hidden" name="name" value="<%= c.name %>" />
+                  <input type="hidden" name="age_range" value="<%= c.age_range %>" />
+                  <select name="teacher_id" onchange="this.form.submit()" style="min-width:150px;">
+                    <option value="">بدون مربية</option>
+                    <% teachers.forEach(function(t) { %>
+                      <option value="<%= t.id %>" <%= c.teacher_id === t.id ? 'selected' : '' %>><%= t.name %></option>
+                    <% }) %>
+                  </select>
+                </form>
+              </td>
+              <td><%= c.children_count %></td>
+              <td>
+                <form method="POST" action="/admin/classes/<%= c.id %>/delete" onsubmit="return confirm('حذف هذا الفصل؟');">
+                  <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (!classes.length) { %><tr><td colspan="5" class="text-muted">لا توجد فصول بعد</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-0">
+    <div class="card-title">إضافة فصل جديد</div>
+    <form method="POST" action="/admin/classes">
+      <div class="form-group">
+        <label class="field-label">اسم الفصل</label>
+        <input type="text" name="name" required placeholder="مثال: فصل النجوم" />
+      </div>
+      <div class="form-group">
+        <label class="field-label">الفئة العمرية</label>
+        <input type="text" name="age_range" placeholder="مثال: 3-4 سنوات" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">المربية المسؤولة</label>
+        <select name="teacher_id">
+          <option value="">بدون مربية حاليًا</option>
+          <% teachers.forEach(function(t) { %>
+            <option value="<%= t.id %>"><%= t.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-plus"></i> إضافة الفصل</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

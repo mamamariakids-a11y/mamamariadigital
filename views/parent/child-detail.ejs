@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1><%= child.name %></h1>
+    <div class="sub"><%= child.class_name || 'بدون فصل حاليًا' %> · السجل الصحي وجهات الطوارئ</div>
+  </div>
+  <a href="/parent" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> عودة لأنشطة طفلي</a>
+</div>
+
+<div class="card mt-0">
+  <div class="card-title"><i class="fa-solid fa-person-walking-arrow-right"></i> استدعاء الطفل</div>
+  <% if (pendingPickup) { %>
+    <div class="alert alert-info" style="margin-bottom:0;">
+      <i class="fa-solid fa-clock"></i> طلب الاستدعاء قيد الانتظار — سيصلك إشعار فور تسليم <%= child.name %>.
+    </div>
+  <% } else { %>
+    <p class="text-muted" style="margin-bottom:14px;">اضغطي عند وصولك أمام الروضة، وستصل الإدارية فورًا لتحضير <%= child.name %> للاستلام.</p>
+    <form method="POST" action="/parent/children/<%= child.id %>/request-pickup">
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-hand"></i> أنا أمام الروضة — استدعاء <%= child.name %></button>
+    </form>
+  <% } %>
+</div>
+
+<div class="card">
+  <p class="text-muted" style="line-height:1.8;">
+    يمكنك تحديث السجل الصحي لطفلك (الحساسية، الأدوية، الأمراض المزمنة) وإضافة جهات اتصال يُسمح لها باستلامه في حالات الطوارئ.
+    تظهر هذه البيانات لإدارة الروضة والمربية لضمان سلامة طفلك.
+  </p>
+</div>
+
+<%- include('../partials/health-record', { healthProfile, contacts, editable, actionPrefix }) %>
+
+<%- include('../partials/development', {
+  assessments,
+  domainLabels: { motor: 'الحركي', cognitive: 'المعرفي', language: 'اللغوي', social: 'الاجتماعي', autonomy: 'الاستقلالية' },
+  levelLabels: { emerging: 'ناشئ', developing: 'في تطور', proficient: 'متمكّن' },
+}) %>
+
+<%- include('../partials/footer') %>

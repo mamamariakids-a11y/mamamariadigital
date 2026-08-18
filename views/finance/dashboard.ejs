@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>اللوحة المالية</h1>
+    <div class="sub">نظرة عامة على الوضعية المالية للروضة</div>
+  </div>
+  <div class="gap-8">
+    <a href="/finance/overdue" class="btn btn-secondary"><i class="fa-solid fa-triangle-exclamation"></i> المتأخرات</a>
+    <a href="/finance/reports" class="btn btn-secondary"><i class="fa-solid fa-file-lines"></i> التقارير</a>
+    <a href="/finance/children" class="btn btn-primary"><i class="fa-solid fa-child-reaching"></i> الوضعية المالية للأطفال</a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-sack-dollar"></i></div>
+    <div><div class="stat-value"><%= todayIncome.toLocaleString('ar') %> دج</div><div class="stat-label">دخل اليوم</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-coins"></i></div>
+    <div><div class="stat-value"><%= monthIncome.toLocaleString('ar') %> دج</div><div class="stat-label">دخل هذا الشهر</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+    <div><div class="stat-value"><%= monthExpenses.toLocaleString('ar') %> دج</div><div class="stat-label">مصاريف هذا الشهر</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:<%= netFlow >= 0 ? '#3AA0A0' : '#D9634F' %>;"><i class="fa-solid fa-scale-balanced"></i></div>
+    <div><div class="stat-value"><%= netFlow.toLocaleString('ar') %> دج</div><div class="stat-label">صافي التدفق الشهري</div></div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-top:18px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#8B5CF6;"><i class="fa-solid fa-vault"></i></div>
+    <div><div class="stat-value"><%= cashboxBalance.toLocaleString('ar') %> دج</div><div class="stat-label">رصيد الصندوق الحالي</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#E0A23A;"><i class="fa-solid fa-bus"></i></div>
+    <div><div class="stat-value"><%= transportIncome.toLocaleString('ar') %> دج</div><div class="stat-label">دخل النقل هذا الشهر</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-user-clock"></i></div>
+    <div><div class="stat-value"><%= overdueCount %></div><div class="stat-label">أطفال عليهم متأخرات</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">اشتراكات هذا الشهر</div>
+  <div class="card-sub">المستحق مقابل المحصّل لهذا الشهر التقويمي</div>
+  <div class="grid grid-2">
+    <div><div class="field-label">إجمالي المستحق</div><div style="font-size:20px; font-weight:800;"><%= monthDue.toLocaleString('ar') %> دج</div></div>
+    <div><div class="field-label">إجمالي المحصّل</div><div style="font-size:20px; font-weight:800; color:#1E6E6E;"><%= monthPaid.toLocaleString('ar') %> دج</div></div>
+  </div>
+  <form method="POST" action="/finance/generate-month-all" style="margin-top:18px;">
+    <input type="hidden" name="month" value="<%= dayjs().format('YYYY-MM') %>" />
+    <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-rotate"></i> توليد/تحديث استحقاقات هذا الشهر لكل الأطفال</button>
+    <div class="form-hint">آمن للتكرار — لا يُنشئ استحقاقات مكررة، ويُحدّث فقط ما لم يُدفع بعد.</div>
+  </form>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px;">
+  <a href="/finance/expenses" class="stat-card" style="text-decoration:none;">
+    <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-receipt"></i></div>
+    <div><div class="stat-value" style="font-size:15px;">المصاريف</div><div class="stat-label">تسجيل وعرض مصاريف الروضة</div></div>
+  </a>
+  <a href="/finance/cashbox" class="stat-card" style="text-decoration:none;">
+    <div class="stat-icon" style="background:#8B5CF6;"><i class="fa-solid fa-vault"></i></div>
+    <div><div class="stat-value" style="font-size:15px;">الصندوق</div><div class="stat-label">سجل حركات الصندوق الكامل</div></div>
+  </a>
+  <% if (user.role === 'admin') { %>
+    <a href="/finance/settings" class="stat-card" style="text-decoration:none;">
+      <div class="stat-icon" style="background:#26314D;"><i class="fa-solid fa-gear"></i></div>
+      <div><div class="stat-value" style="font-size:15px;">الإعدادات المالية</div><div class="stat-label">خطط الاشتراك، الرسوم، الصلاحيات</div></div>
+    </a>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

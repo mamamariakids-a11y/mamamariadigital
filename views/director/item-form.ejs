@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1><%= item && item.id ? 'تعديل درس/نشاط' : 'إنشاء درس أو نشاط جديد' %></h1>
+    <div class="sub">أرسليه مباشرة إلى مربيات الفصول المختارة</div>
+  </div>
+  <a href="/director" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> رجوع للتقويم</a>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<form method="POST" action="<%= item && item.id ? '/director/items/' + item.id : '/director/items' %>" enctype="multipart/form-data">
+  <div class="grid grid-2" style="align-items:start;">
+    <div class="card mt-0">
+      <div class="card-title">البيانات الأساسية</div>
+      <div class="card-sub">النوع، العنوان، والتاريخ المستهدف</div>
+
+      <div class="form-group">
+        <label class="field-label">النوع</label>
+        <div class="radio-row">
+          <label><input type="radio" name="type" value="lesson" <%= (!item || item.type !== 'activity') ? 'checked' : '' %> /><span>📘 درس</span></label>
+          <label><input type="radio" name="type" value="activity" <%= (item && item.type === 'activity') ? 'checked' : '' %> /><span>🎨 نشاط</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">العنوان</label>
+        <input type="text" name="title" required value="<%= item ? item.title : '' %>" placeholder="مثال: حرف الألف - التعرف والنطق" />
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">التاريخ المستهدف</label>
+        <input type="date" name="scheduled_date" required value="<%= item ? item.scheduled_date : '' %>" />
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">الأولوية</label>
+        <div class="radio-row">
+          <label><input type="radio" name="priority" value="normal" <%= (!item || item.priority === 'normal') ? 'checked' : '' %> /><span>عادية</span></label>
+          <label><input type="radio" name="priority" value="important" <%= (item && item.priority === 'important') ? 'checked' : '' %> /><span>مهمة</span></label>
+          <label><input type="radio" name="priority" value="urgent" <%= (item && item.priority === 'urgent') ? 'checked' : '' %> /><span>عاجلة</span></label>
+        </div>
+      </div>
+
+      <div class="form-group mt-0">
+        <label class="field-label">الفصول المستهدفة</label>
+        <div class="checkbox-grid">
+          <% classes.forEach(function(c) { %>
+            <label class="checkbox-pill <%= selectedClasses.map(String).includes(String(c.id)) ? 'checked' : '' %>">
+              <input type="checkbox" name="class_ids" value="<%= c.id %>" <%= selectedClasses.map(String).includes(String(c.id)) ? 'checked' : '' %> />
+              <span class="class-dot" style="background: <%= c.color %>; display:inline-block;"></span>
+              <%= c.name %> <span class="text-muted">(<%= c.teacher_name || 'بدون مربية' %>)</span>
+            </label>
+          <% }) %>
+        </div>
+        <% if (!classes.length) { %><div class="form-hint">لا توجد فصول بعد — أضيفي فصلًا من لوحة الإدارة أولًا.</div><% } %>
+      </div>
+    </div>
+
+    <div class="card mt-0">
+      <div class="card-title">التفاصيل التربوية</div>
+      <div class="card-sub">الوصف، الهدف، والمواد المطلوبة</div>
+
+      <div class="form-group">
+        <label class="field-label">الوصف</label>
+        <textarea name="description" placeholder="اشرحي محتوى الدرس أو النشاط بالتفصيل..."><%= item ? item.description : '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">الهدف التربوي</label>
+        <textarea name="objective" placeholder="ما الذي يجب أن يكتسبه الطفل بعد هذا الدرس/النشاط؟"><%= item ? item.objective : '' %></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">المواد المطلوبة</label>
+        <textarea name="materials" placeholder="مثال: بطاقات صور، ألوان، ورق..."><%= item ? item.materials : '' %></textarea>
+      </div>
+
+      <div class="form-group mt-0">
+        <label class="field-label">إرفاق ملفات / صور (اختياري)</label>
+        <input type="file" name="attachments" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx" />
+        <div class="form-hint file-label-text" data-default="بحد أقصى 8 ملفات، 4 ميجا لكل ملف">بحد أقصى 8 ملفات، 4 ميجا لكل ملف</div>
+
+        <% if (item && item.attachments && item.attachments.length) { %>
+          <div class="attach-list">
+            <% item.attachments.forEach(function(a) { %>
+              <label class="attach-chip">
+                <input type="checkbox" name="remove_attachments" value="<%= a.id %>" />
+                <i class="fa-solid fa-paperclip"></i> <%= a.name %> <span class="text-muted">(حذف)</span>
+              </label>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="display:flex; gap:10px; justify-content:flex-end;">
+    <a href="/director" class="btn btn-secondary">إلغاء</a>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> <%= item && item.id ? 'حفظ التعديلات' : 'إرسال إلى المربيات' %></button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

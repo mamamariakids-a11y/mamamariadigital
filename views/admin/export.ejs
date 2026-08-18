@@ -1,0 +1,49 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>تصدير ونسخ احتياطي</h1>
+    <div class="sub">نسخة كاملة من بيانات الروضة كملف Excel واحد، لحفظها لديك في أي وقت</div>
+  </div>
+  <a href="/admin/export/download" class="btn btn-primary"><i class="fa-solid fa-file-arrow-down"></i> تنزيل النسخة الاحتياطية الآن</a>
+</div>
+
+<div class="grid grid-3">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-users"></i></div>
+    <div><div class="stat-value"><%= counts.users %></div><div class="stat-label">المستخدمون</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-child-reaching"></i></div>
+    <div><div class="stat-value"><%= counts.children %></div><div class="stat-label">الأطفال</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#E0A23A;"><i class="fa-solid fa-clipboard-check"></i></div>
+    <div><div class="stat-value"><%= counts.attendance %></div><div class="stat-label">سجلات الحضور والغياب</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-note-sticky"></i></div>
+    <div><div class="stat-value"><%= counts.notes %></div><div class="stat-label">ملاحظات الأولياء</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#8B5CF6;"><i class="fa-solid fa-layer-group"></i></div>
+    <div><div class="stat-value"><%= counts.items %></div><div class="stat-label">الدروس والأنشطة</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#B65C9E;"><i class="fa-solid fa-champagne-glasses"></i></div>
+    <div><div class="stat-value"><%= counts.events %></div><div class="stat-label">الفعاليات العامة</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">ماذا يحتوي الملف؟</div>
+  <p class="text-muted" style="line-height:1.9;">
+    عند الضغط على زر التنزيل، يُنشئ النظام ملف Excel واحدًا يحتوي على ورقة منفصلة لكل من:
+    المستخدمون (بدون كلمات المرور)، الفصول، الأطفال وأولياء أمورهم، سجل الحضور والغياب الكامل،
+    ملاحظات وتوصيات الأولياء، الدروس والأنشطة وحالة تنفيذها، والفعاليات العامة.
+    يمكنك فتح الملف وحفظه على جهازك أو مشاركته، ويُنصح بتنزيل نسخة جديدة بين حين وآخر كنسخة احتياطية إضافية
+    (مع العلم أن بياناتك محفوظة تلقائيًا وبشكل دائم على خوادم Turso في كل الأحوال).
+  </p>
+</div>
+
+<%- include('../partials/footer') %>

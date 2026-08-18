@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>التقرير اليومي للأطفال</h1>
+    <div class="sub">متابعة الوجبات والقيلولة والحالة المزاجية والحمام لكل الفصول</div>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?date=<%= prevDate %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?"><span style="font-size:12px;">اليوم</span></a>
+      <a class="nav-btn" href="?date=<%= nextDate %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= dayjs(date).format('dddd DD MMMM YYYY') %></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:6px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-clipboard-check"></i></div>
+    <div><div class="stat-value"><%= totalFilled %></div><div class="stat-label">تم تعبئة تقريرهم</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#8892B5;"><i class="fa-solid fa-clipboard"></i></div>
+    <div><div class="stat-value"><%= totalChildren - totalFilled %></div><div class="stat-label">بدون تقرير بعد</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-child"></i></div>
+    <div><div class="stat-value"><%= totalChildren %></div><div class="stat-label">إجمالي الأطفال</div></div>
+  </div>
+</div>
+
+<% if (!classesToday.length) { %>
+  <div class="card"><div class="empty-state"><div class="es-icon">🏫</div><h3>لا توجد فصول أو أطفال مسجّلون بعد</h3></div></div>
+<% } %>
+
+<% classesToday.forEach(function(cls) { %>
+  <div class="card">
+    <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+      <span class="class-dot" style="background:<%= cls.color %>;"></span> <%= cls.name %>
+    </div>
+    <div class="card-sub"><%= cls.filled %> من <%= cls.children.length %> تم تعبئة تقريرهم</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الطفل</th><th>الوجبات</th><th>القيلولة</th><th>المزاج</th><th>الحمام</th><th>ملاحظات</th></tr></thead>
+        <tbody>
+          <% cls.children.forEach(function(c) { %>
+            <tr>
+              <td><%= c.child_name %></td>
+              <td><%= c.meal_status ? mealLabels[c.meal_status] : '—' %></td>
+              <td><%= c.nap_status ? napLabels[c.nap_status] + (c.nap_minutes ? ' (' + c.nap_minutes + ' د)' : '') : '—' %></td>
+              <td><%= c.mood ? moodLabels[c.mood] : '—' %></td>
+              <td><%= c.bathroom_count !== null ? c.bathroom_count : '—' %></td>
+              <td class="text-muted"><%= c.notes || '—' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% }) %>
+
+<%- include('../partials/footer') %>

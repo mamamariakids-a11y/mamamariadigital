@@ -1,0 +1,49 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>التقويم التربوي</h1>
+    <div class="sub">إدارة الدروس والأنشطة الأسبوعية والشهرية لجميع الفصول</div>
+  </div>
+  <a href="/director/items/new" class="btn btn-primary"><i class="fa-solid fa-circle-plus"></i> إنشاء درس/نشاط جديد</a>
+</div>
+
+<div class="card">
+  <div class="calendar-toolbar">
+    <div class="calendar-nav">
+      <a class="nav-btn" href="?view=<%= view %>&date=<%= prevDate %>"><i class="fa-solid fa-chevron-right"></i></a>
+      <a class="nav-btn today-btn" href="?view=<%= view %>"><span style="font-size:12px;">اليوم</span></a>
+      <a class="nav-btn" href="?view=<%= view %>&date=<%= nextDate %>"><i class="fa-solid fa-chevron-left"></i></a>
+      <div class="label"><%= monthLabel %></div>
+    </div>
+    <div class="view-switch">
+      <a class="<%= view === 'week' ? 'active' : '' %>" href="?view=week&date=<%= anchor %>">أسبوعي</a>
+      <a class="<%= view === 'month' ? 'active' : '' %>" href="?view=month&date=<%= anchor %>">شهري</a>
+    </div>
+  </div>
+
+  <div class="<%= view === 'week' ? 'week-grid' : 'month-grid' %>">
+    <% days.forEach(function(day) { %>
+      <div class="day-col <%= day.isToday ? 'today' : '' %> <%= (view==='month' && !day.inMonth) ? 'out-month' : '' %>">
+        <div class="day-col-head">
+          <span class="dname"><%= day.label %></span>
+          <span class="dnum"><%= day.dayNum %></span>
+        </div>
+        <% if (!day.items.length) { %>
+          <div class="day-empty">لا يوجد</div>
+        <% } %>
+        <% day.items.forEach(function(it) { %>
+          <a class="day-item type-<%= it.type %>" href="/director/items/<%= it.id %>">
+            <%= it.title %>
+            <span class="di-status">
+              <%= it.class_names || 'بدون فصل' %> ·
+              <%= it.executed_count == it.assignment_count && it.assignment_count > 0 ? 'تم التنفيذ بالكامل' : (it.min_status === 'pending' ? 'بانتظار الاستلام' : 'قيد المتابعة') %>
+            </span>
+          </a>
+        <% }) %>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,89 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>لوحة التحكم</h1>
+    <div class="sub">نظرة عامة على أداء الروضة هذا الأسبوع</div>
+  </div>
+  <a href="/director/items/new" class="btn btn-primary"><i class="fa-solid fa-circle-plus"></i> إنشاء درس/نشاط</a>
+</div>
+
+<div class="grid grid-4">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-layer-group"></i></div>
+    <div><div class="stat-value"><%= totals.total %></div><div class="stat-label">إجمالي المهام هذا الأسبوع</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#99A2B8;"><i class="fa-regular fa-clock"></i></div>
+    <div><div class="stat-value"><%= totals.pending %></div><div class="stat-label">بانتظار الاستلام</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#E0A23A;"><i class="fa-solid fa-inbox"></i></div>
+    <div><div class="stat-value"><%= totals.received %></div><div class="stat-label">تم الاستلام</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#3AA0A0;"><i class="fa-solid fa-circle-check"></i></div>
+    <div><div class="stat-value"><%= totals.executed %></div><div class="stat-label">تم التنفيذ</div></div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-top:18px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#8B5CF6;"><i class="fa-solid fa-chalkboard"></i></div>
+    <div><div class="stat-value"><%= classesCount %></div><div class="stat-label">عدد الفصول</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#D9634F;"><i class="fa-solid fa-users"></i></div>
+    <div><div class="stat-value"><%= teachersCount %></div><div class="stat-label">عدد المربيات</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#4A7CE0;"><i class="fa-solid fa-child-reaching"></i></div>
+    <div><div class="stat-value"><%= childrenCount %></div><div class="stat-label">عدد الأطفال المسجلين</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">أداء الفصول هذا الأسبوع</div>
+  <div class="card-sub">نسبة إنجاز الدروس والأنشطة المرسلة لكل فصل</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الفصل</th><th>المربية</th><th>المهام المرسلة</th><th>المُنفَّذة</th><th>نسبة الإنجاز</th></tr></thead>
+      <tbody>
+        <% classesOverview.forEach(function(c) { %>
+          <% const pct = c.assigned_count > 0 ? Math.round((c.done_count / c.assigned_count) * 100) : 0; %>
+          <tr>
+            <td><span class="class-dot" style="background:<%= c.color %>; display:inline-block; margin-left:6px;"></span><%= c.name %></td>
+            <td><%= c.teacher_name || '—' %></td>
+            <td><%= c.assigned_count %></td>
+            <td><%= c.done_count %></td>
+            <td><%= pct %>%</td>
+          </tr>
+        <% }) %>
+        <% if (!classesOverview.length) { %><tr><td colspan="5" class="text-muted">لا توجد فصول بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">آخر الدروس والأنشطة المضافة</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>العنوان</th><th>النوع</th><th>التاريخ</th><th>الفصول</th><th></th></tr></thead>
+      <tbody>
+        <% recentItems.forEach(function(it) { %>
+          <tr>
+            <td><%= it.title %></td>
+            <td><span class="badge badge-<%= it.type %>"><%= it.type === 'activity' ? 'نشاط' : 'درس' %></span></td>
+            <td><%= dayjs(it.scheduled_date).format('DD/MM/YYYY') %></td>
+            <td><%= it.class_names || '—' %></td>
+            <td><a href="/director/items/<%= it.id %>" class="btn btn-secondary btn-sm">عرض</a></td>
+          </tr>
+        <% }) %>
+        <% if (!recentItems.length) { %><tr><td colspan="5" class="text-muted">لا يوجد بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>طلب حساب ولي أمر | روضة ماما ماريا</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <img class="logo-img" src="/images/logo.png" alt="شعار روضة ماما ماريا" />
+        <h1>طلب حساب ولي أمر</h1>
+        <p>سيتم مراجعة طلبك من قبل إدارة الروضة قبل التفعيل</p>
+      </div>
+
+      <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+      <% if (!success) { %>
+        <form method="POST" action="/register">
+          <div class="form-group">
+            <label class="field-label">الاسم الكامل</label>
+            <input type="text" name="name" required autofocus />
+          </div>
+          <div class="form-group">
+            <label class="field-label">البريد الإلكتروني</label>
+            <input type="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label class="field-label">كلمة المرور (6 أحرف على الأقل)</label>
+            <input type="password" name="password" required minlength="6" />
+          </div>
+          <div class="form-group">
+            <label class="field-label">رقم الهاتف (اختياري)</label>
+            <input type="tel" name="phone" />
+          </div>
+          <div class="form-group">
+            <label class="field-label">اسم الطفل (اختياري)</label>
+            <input type="text" name="child_name" placeholder="لربط طفلك بحسابك بعد الموافقة" />
+          </div>
+          <div class="form-group mt-0">
+            <label class="field-label">ملاحظات إضافية (اختياري)</label>
+            <textarea name="notes" rows="2"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">إرسال الطلب</button>
+        </form>
+      <% } %>
+
+      <div style="text-align:center; margin-top:16px;">
+        <a href="/login" style="color:var(--color-primary-dark); font-weight:700; font-size:13.5px;">لديك حساب بالفعل؟ سجّل الدخول</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

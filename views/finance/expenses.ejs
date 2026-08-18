@@ -1,0 +1,103 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>المصاريف</h1>
+    <div class="sub">تسجيل ومتابعة مصاريف الروضة حسب التصنيف والمورّد</div>
+  </div>
+  <a href="/finance" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> اللوحة المالية</a>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<div class="card mt-0">
+  <div class="card-title">تسجيل مصروف جديد</div>
+  <form method="POST" action="/finance/expenses" enctype="multipart/form-data">
+    <div class="grid grid-3">
+      <div class="form-group mt-0" style="grid-column: span 2;">
+        <label class="field-label">الوصف</label>
+        <input type="text" name="description" required placeholder="مثال: شراء مواد تنظيف" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">المبلغ (دج)</label>
+        <input type="number" step="0.01" min="0.01" name="amount" required />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">التصنيف</label>
+        <select name="category_id">
+          <option value="">بدون تصنيف</option>
+          <% categories.forEach(function(c) { %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">المورّد (اختياري)</label>
+        <select name="supplier_id">
+          <option value="">بدون مورّد</option>
+          <% suppliers.forEach(function(s) { %><option value="<%= s.id %>"><%= s.name %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">التاريخ</label>
+        <input type="date" name="expense_date" value="<%= today %>" required />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">طريقة الدفع</label>
+        <select name="method">
+          <% Object.entries(methodLabels).forEach(function(e) { %><option value="<%= e[0] %>"><%= e[1] %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">رقم الفاتورة (اختياري)</label>
+        <input type="text" name="invoice_number" />
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">صورة الفاتورة (اختياري)</label>
+        <input type="file" name="invoice_photo" accept="image/*,.pdf" />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> حفظ المصروف</button>
+  </form>
+
+  <div class="section-title">إضافة مورّد جديد</div>
+  <form method="POST" action="/finance/suppliers" class="grid grid-3">
+    <div class="form-group mt-0"><label class="field-label">اسم المورّد</label><input type="text" name="name" required /></div>
+    <div class="form-group mt-0"><label class="field-label">الهاتف</label><input type="tel" name="phone" /></div>
+    <div class="form-group mt-0" style="align-self:flex-end;"><button type="submit" class="btn btn-secondary btn-block"><i class="fa-solid fa-plus"></i> إضافة</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">سجل المصاريف</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>التاريخ</th><th>الوصف</th><th>التصنيف</th><th>المورّد</th><th>المبلغ</th><th>الموظف</th><th>الحالة</th><th></th></tr></thead>
+      <tbody>
+        <% expenses.forEach(function(exp) { %>
+          <tr>
+            <td><%= exp.expense_date %></td>
+            <td><%= exp.description %></td>
+            <td><%= exp.category_name || '—' %></td>
+            <td><%= exp.supplier_name || '—' %></td>
+            <td><%= Number(exp.amount).toLocaleString('ar') %> دج</td>
+            <td class="text-muted"><%= exp.recorded_by_name || '—' %></td>
+            <td>
+              <% if (exp.status === 'voided') { %><span class="badge badge-urgent">ملغى</span>
+              <% } else { %><span class="badge badge-executed">فعّال</span><% } %>
+            </td>
+            <td>
+              <% if (exp.status === 'active') { %>
+                <form method="POST" action="/finance/expenses/<%= exp.id %>/void" onsubmit="return confirm('سيتم إلغاء هذا المصروف (وليس حذفه) مع تسجيل السبب. متابعة؟') && (this.reason.value = prompt('سبب الإلغاء:') || '') !== '';">
+                  <input type="hidden" name="reason" />
+                  <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-ban"></i> إلغاء</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!expenses.length) { %><tr><td colspan="8" class="text-muted">لا توجد مصاريف مسجّلة بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

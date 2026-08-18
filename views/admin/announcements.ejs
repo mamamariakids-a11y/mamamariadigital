@@ -1,0 +1,63 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الإعلانات</h1>
+    <div class="sub">إرسال إعلان فوري لمجموعة مستهدفة من المستخدمين (يصلهم كإشعار داخل النظام)</div>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+<div class="card mt-0">
+  <form method="POST" action="/admin/announcements">
+    <div class="form-group">
+      <label class="field-label">العنوان</label>
+      <input type="text" name="title" required />
+    </div>
+    <div class="form-group">
+      <label class="field-label">النص</label>
+      <textarea name="message" rows="3" required></textarea>
+    </div>
+    <div class="grid grid-2">
+      <div class="form-group mt-0">
+        <label class="field-label">الجمهور المستهدف</label>
+        <select name="audience" id="audienceSelect" onchange="document.getElementById('classPicker').style.display = this.value === 'class' ? 'block' : 'none';">
+          <option value="all_parents">جميع الأولياء</option>
+          <option value="all_staff">جميع الطاقم (مربيات، إداريين، مديرة تربوية)</option>
+          <option value="class">أولياء فصل معيّن</option>
+        </select>
+      </div>
+      <div class="form-group mt-0" id="classPicker" style="display:none;">
+        <label class="field-label">الفصل</label>
+        <select name="class_id">
+          <% classes.forEach(function(c) { %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> إرسال الإعلان</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">آخر الإعلانات المُرسلة</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>التاريخ</th><th>العنوان</th><th>الجمهور</th><th>عدد المستلمين</th><th>بواسطة</th></tr></thead>
+      <tbody>
+        <% recent.forEach(function(r) { %>
+          <tr>
+            <td><%= dayjs(r.created_at).format('YYYY-MM-DD HH:mm') %></td>
+            <td><%= r.details.title %></td>
+            <td class="text-muted"><%= r.details.audience %></td>
+            <td><%= r.details.recipientCount %></td>
+            <td class="text-muted"><%= r.user_name %></td>
+          </tr>
+        <% }) %>
+        <% if (!recent.length) { %><tr><td colspan="5" class="text-muted">لم يُرسل أي إعلان بعد</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

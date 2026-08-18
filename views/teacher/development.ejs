@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1><%= child.name %></h1>
+    <div class="sub">التطور البيداغوجي — تقييمات دورية</div>
+  </div>
+  <a href="/teacher/children/<%= child.id %>/health" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> عودة</a>
+</div>
+
+<div class="card mt-0">
+  <div class="card-title">إضافة تقييم جديد</div>
+  <form method="POST" action="/teacher/children/<%= child.id %>/development">
+    <div class="grid grid-2">
+      <div class="form-group mt-0">
+        <label class="field-label">المجال</label>
+        <select name="domain" required>
+          <% Object.entries(domainLabels).forEach(function(e) { %>
+            <option value="<%= e[0] %>"><%= e[1] %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group mt-0">
+        <label class="field-label">المستوى</label>
+        <div class="radio-row">
+          <% Object.entries(levelLabels).forEach(function(e, i) { %>
+            <label><input type="radio" name="level" value="<%= e[0] %>" <%= i === 0 ? 'checked' : '' %> /><span><%= e[1] %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">ملاحظة (اختياري)</label>
+      <textarea name="note" rows="2" placeholder="مثال: يحتاج تشجيعًا إضافيًا في الأنشطة الجماعية"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> حفظ التقييم</button>
+  </form>
+</div>
+
+<%- include('../partials/development', { assessments, domainLabels, levelLabels }) %>
+
+<%- include('../partials/footer') %>

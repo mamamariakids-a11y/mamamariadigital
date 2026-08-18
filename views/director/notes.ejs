@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>ملاحظات وتوصيات الأولياء</h1>
+    <div class="sub">نظرة شاملة على كل الملاحظات من كل الفصول</div>
+  </div>
+  <div class="view-switch">
+    <a class="<%= !showAll ? 'active' : '' %>" href="?all=0">النشطة فقط</a>
+    <a class="<%= showAll ? 'active' : '' %>" href="?all=1">الكل (مع الأرشيف)</a>
+  </div>
+</div>
+
+<% if (!notes.length) { %>
+  <div class="card mt-0">
+    <div class="empty-state">
+      <div class="es-icon">📝</div>
+      <h3>لا توجد ملاحظات لعرضها</h3>
+    </div>
+  </div>
+<% } else { %>
+
+  <div class="card mt-0">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>الطفل</th><th>الفصل</th><th>النوع</th><th>الملاحظة</th><th>الحالة</th><th>بواسطة</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% notes.forEach(function(n) { %>
+            <tr class="<%= n.archived ? 'text-muted' : '' %>">
+              <td><%= n.child_name %></td>
+              <td><span class="class-dot" style="background:<%= n.class_color %>; display:inline-block; margin-left:6px;"></span><%= n.class_name %></td>
+              <td style="white-space:nowrap;"><%= categoryLabels[n.category] %><br/><span class="text-muted" style="font-size:11px;"><%= n.note_type === 'daily' ? 'يوم واحد (' + n.note_date + ')' : 'دائمة' %><% if (n.note_time) { %> · <i class="fa-solid fa-bell"></i> <%= n.note_time %><% } %></span></td>
+              <td style="max-width:280px;">
+                <%= n.content %>
+                <% if (n.status === 'done' && n.done_note) { %><div class="text-muted" style="font-size:12px; margin-top:4px;">رد المربية: <%= n.done_note %></div><% } %>
+              </td>
+              <td>
+                <% if (n.archived) { %><span class="badge badge-normal">مؤرشفة</span>
+                <% } else if (n.status === 'done') { %><span class="badge badge-executed">✅ تم الاطلاع</span>
+                <% } else { %><span class="badge badge-urgent">بانتظار الاطلاع</span><% } %>
+              </td>
+              <td class="text-muted" style="font-size:12px;">
+                <%= n.created_by_name || '—' %>
+                <% if (n.status === 'done') { %><br/>تأكيد: <%= n.done_by_name || '—' %><% } %>
+              </td>
+              <td>
+                <% if (!n.archived) { %>
+                  <form method="POST" action="/director/notes/<%= n.id %>/delete" onsubmit="return confirm('أرشفة هذه الملاحظة؟');">
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-box-archive"></i></button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

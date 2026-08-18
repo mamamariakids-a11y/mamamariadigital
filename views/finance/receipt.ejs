@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>وصل دفع <%= payment.receipt_number %></h1>
+    <div class="sub"><%= dayjs(payment.created_at).format('YYYY-MM-DD HH:mm') %></div>
+  </div>
+  <div class="gap-8">
+    <a href="/finance/receipts/<%= payment.id %>/pdf" target="_blank" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> عرض/تحميل PDF</a>
+    <% if (typeof user !== 'undefined' && user && user.role !== 'parent') { %>
+      <a href="/finance/children/<%= payment.child_id %>" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> عودة للملف المالي</a>
+    <% } %>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="grid grid-2">
+    <div><div class="field-label">الطفل</div><div class="text-muted"><%= payment.child_name %></div></div>
+    <div><div class="field-label">الفصل</div><div class="text-muted"><%= payment.class_name || '—' %></div></div>
+    <div><div class="field-label">ولي الأمر</div><div class="text-muted"><%= payment.parent_name || '—' %></div></div>
+    <div><div class="field-label">السبب</div><div class="text-muted"><%= reasonLabels[payment.reason] %></div></div>
+    <div><div class="field-label">طريقة الدفع</div><div class="text-muted"><%= methodLabels[payment.method] %></div></div>
+    <div><div class="field-label">الموظف</div><div class="text-muted"><%= payment.employee_name || '—' %></div></div>
+    <% if (payment.fee_month) { %>
+      <div><div class="field-label">الشهر</div><div class="text-muted"><%= dayjs(payment.fee_month, 'YYYY-MM').format('MMMM YYYY') %></div></div>
+    <% } %>
+    <% if (remaining !== null) { %>
+      <div><div class="field-label">المتبقي بعد هذه الدفعة</div><div class="text-muted"><%= Number(remaining).toLocaleString('ar') %> دج</div></div>
+    <% } %>
+  </div>
+  <div class="divider"></div>
+  <div style="text-align:center;">
+    <div class="field-label">المبلغ المدفوع</div>
+    <div style="font-size:32px; font-weight:800; color:#3A63B8;"><%= Number(payment.amount).toLocaleString('ar') %> دج</div>
+  </div>
+  <% if (payment.status === 'voided') { %>
+    <div class="alert alert-danger" style="margin-top:18px;">
+      <i class="fa-solid fa-ban"></i> هذه الدفعة مُلغاة — السبب: <%= payment.voided_reason %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

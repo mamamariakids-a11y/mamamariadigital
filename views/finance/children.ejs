@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الوضعية المالية للأطفال</h1>
+    <div class="sub">عرض وضعية الاشتراك لكل طفل، والانتقال لتسجيل دفعة</div>
+  </div>
+  <a href="/finance" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> اللوحة المالية</a>
+</div>
+
+<div class="card mt-0">
+  <form method="GET" action="/finance/children" class="grid grid-3">
+    <div class="form-group mt-0" style="grid-column: span 2;">
+      <label class="field-label">بحث باسم الطفل</label>
+      <input type="text" name="q" value="<%= q %>" placeholder="اكتبي اسم الطفل..." />
+    </div>
+    <div class="form-group mt-0" style="align-self:flex-end;">
+      <button type="submit" class="btn btn-secondary btn-block"><i class="fa-solid fa-magnifying-glass"></i> بحث</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الطفل</th><th>الفصل</th><th>حالة الحساب</th><th>المستحق</th><th>المدفوع</th><th>المتبقي</th><th></th></tr></thead>
+      <tbody>
+        <% children.forEach(function(c) { %>
+          <% const b = balances[c.id]; %>
+          <tr>
+            <td><%= c.name %></td>
+            <td><%= c.class_name || '—' %></td>
+            <td>
+              <% if (!c.has_account) { %><span class="badge badge-normal">بلا ملف مالي</span>
+              <% } else if (c.exempt) { %><span class="badge badge-lesson">معفى</span>
+              <% } else { %><span class="badge badge-executed">مفعّل</span><% } %>
+            </td>
+            <td><%= b ? Number(b.totalDue).toLocaleString('ar') + ' دج' : '—' %></td>
+            <td><%= b ? Number(b.totalPaid).toLocaleString('ar') + ' دج' : '—' %></td>
+            <td><%- b && b.totalRemaining > 0 ? '<span class="badge badge-urgent">' + Number(b.totalRemaining).toLocaleString('ar') + ' دج</span>' : (b ? '—' : '') %></td>
+            <td><a href="/finance/children/<%= c.id %>" class="btn btn-secondary btn-sm">فتح الملف المالي</a></td>
+          </tr>
+        <% }) %>
+        <% if (!children.length) { %><tr><td colspan="7" class="text-muted">لا يوجد أطفال مطابقون</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,63 @@
+<%- include('../partials/header') %>
+
+<%
+  const roleLabels = { admin: 'مديرة الروضة', director: 'المديرة التربوية', teacher: 'مربية', parent: 'ولي أمر', staff: 'إدارية', driver: 'سائق' };
+%>
+
+<div class="page-actions">
+  <div>
+    <h1>البحث الشامل</h1>
+    <div class="sub">ابحث عن أي طفل، ولي أمر، مربية أو موظف بالاسم أو البريد أو الهاتف</div>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <form method="GET" action="/search" style="display:flex; gap:10px;">
+    <input type="text" name="q" value="<%= q %>" placeholder="اكتبي اسمًا، بريدًا، أو رقم هاتف..." autofocus style="flex:1;" />
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> بحث</button>
+  </form>
+</div>
+
+<% if (q) { %>
+  <div class="grid" style="grid-template-columns: 1fr 1fr; align-items:start;">
+    <div class="card mt-0">
+      <div class="card-title">الأطفال (<%= children.length %>)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الاسم</th><th>الفصل</th><th>ولي الأمر</th></tr></thead>
+          <tbody>
+            <% children.forEach(function(c) { %>
+              <tr>
+                <td><a href="/admin/children/<%= c.id %>" style="font-weight:700; color:var(--color-primary-dark);"><%= c.name %></a></td>
+                <td><%= c.class_name || '—' %></td>
+                <td><%= c.parent_name || '—' %></td>
+              </tr>
+            <% }) %>
+            <% if (!children.length) { %><tr><td colspan="3" class="text-muted">لا نتائج</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mt-0">
+      <div class="card-title">المستخدمون (<%= users.length %>)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الاسم</th><th>الدور</th><th>البريد/الهاتف</th></tr></thead>
+          <tbody>
+            <% users.forEach(function(u) { %>
+              <tr>
+                <td style="font-weight:700;"><%= u.name %></td>
+                <td><span class="badge badge-received"><%= roleLabels[u.role] || u.role %></span></td>
+                <td class="text-muted"><%= u.email %><% if (u.phone) { %> / <%= u.phone %><% } %></td>
+              </tr>
+            <% }) %>
+            <% if (!users.length) { %><tr><td colspan="3" class="text-muted">لا نتائج</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

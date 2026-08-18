@@ -1,0 +1,90 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>أنشطة طفلي</h1>
+    <div class="sub">تابعي آخر الدروس والأنشطة التي نفذها فصل طفلك</div>
+  </div>
+</div>
+
+<% if (!hasChildren) { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="es-icon">👶</div>
+      <h3>لا يوجد طفل مرتبط بحسابك بعد</h3>
+      <p>يرجى التواصل مع إدارة الروضة لربط حساب طفلك.</p>
+    </div>
+  </div>
+<% } else { %>
+
+  <div class="grid grid-3" style="margin-bottom:6px;">
+    <% children.forEach(function(c) { %>
+      <a href="/parent/children/<%= c.id %>" class="stat-card" style="cursor:pointer;">
+        <div class="stat-icon" style="background:#B65C9E;"><i class="fa-solid fa-child"></i></div>
+        <div><div class="stat-value" style="font-size:16px;"><%= c.name %></div><div class="stat-label"><%= c.class_name || 'بدون فصل حاليًا' %> · السجل الصحي</div></div>
+      </a>
+    <% }) %>
+  </div>
+
+  <div class="card">
+    <div class="card-title">التقرير اليومي</div>
+    <% if (!dailyReports.length) { %>
+      <div class="empty-state">
+        <div class="es-icon">📋</div>
+        <h3>لا يوجد تقرير يومي بعد</h3>
+        <p>سيظهر هنا تقرير الوجبات والقيلولة والحالة المزاجية بمجرد أن تعبئه المربية.</p>
+      </div>
+    <% } else { %>
+      <% dailyReports.forEach(function(r) { %>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:#3AA0A0;">📋</div>
+          <div class="feed-body">
+            <h3><%= r.child_name %> — <%= dayjs(r.date).format('dddd DD MMMM') %></h3>
+            <div class="dr-summary">
+              <% if (r.meal_status) { %><span class="dr-chip">🍽️ <%= mealLabels[r.meal_status] %></span><% } %>
+              <% if (r.nap_status) { %><span class="dr-chip">😴 <%= napLabels[r.nap_status] %><%= r.nap_minutes ? ' (' + r.nap_minutes + ' د)' : '' %></span><% } %>
+              <% if (r.mood) { %><span class="dr-chip"><%= moodLabels[r.mood] %></span><% } %>
+              <% if (r.bathroom_count !== null) { %><span class="dr-chip">🚽 <%= r.bathroom_count %> مرات</span><% } %>
+            </div>
+            <% if (r.notes) { %><p style="margin-top:8px;"><%= r.notes %></p><% } %>
+            <div class="feed-time"><%= dayjs(r.updated_at).format('HH:mm') %></div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <div class="card">
+    <div class="card-title">آخر الأنشطة المنفذة</div>
+    <% if (!feed.length) { %>
+      <div class="empty-state">
+        <div class="es-icon">🎨</div>
+        <h3>لا توجد أنشطة منفذة بعد</h3>
+        <p>سيظهر هنا كل نشاط أو درس تؤكد المربية تنفيذه.</p>
+      </div>
+    <% } else { %>
+      <% feed.forEach(function(f) { %>
+        <div class="feed-item">
+          <div class="feed-icon" style="background: <%= f.type === 'activity' ? '#E0A23A' : '#4A7CE0' %>;">
+            <%= f.type === 'activity' ? '🎨' : '📘' %>
+          </div>
+          <div class="feed-body">
+            <h3><%= f.title %></h3>
+            <p><%= f.description %></p>
+            <% if (f.execution_notes) { %><p><strong>ملاحظات المربية:</strong> <%= f.execution_notes %></p><% } %>
+            <% if (f.execution_photos.length) { %>
+              <div class="photo-grid">
+                <% f.execution_photos.forEach(function(p) { %>
+                  <a href="data:<%= p.mime %>;base64,<%= p.data %>" target="_blank"><img src="data:<%= p.mime %>;base64,<%= p.data %>" alt="صورة النشاط" /></a>
+                <% }) %>
+              </div>
+            <% } %>
+            <div class="feed-time"><%= f.class_name %> · بواسطة <%= f.teacher_name || 'المربية' %> · <%= dayjs(f.executed_at).format('dddd DD MMMM - HH:mm') %></div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

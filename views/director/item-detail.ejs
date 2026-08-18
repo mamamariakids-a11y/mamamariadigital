@@ -1,0 +1,91 @@
+<%- include('../partials/header') %>
+
+<div class="page-actions">
+  <a href="/director" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> رجوع للتقويم</a>
+  <div class="gap-8">
+    <a href="/director/items/<%= item.id %>/edit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> تعديل</a>
+    <form method="POST" action="/director/items/<%= item.id %>/delete" onsubmit="return confirm('هل أنت متأكدة من حذف هذا الدرس/النشاط؟');">
+      <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> حذف</button>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-0">
+  <div class="detail-header">
+    <div>
+      <span class="badge badge-<%= item.type %>"><%= item.type === 'activity' ? '🎨 نشاط' : '📘 درس' %></span>
+      <span class="badge badge-<%= item.priority %>"><%= {normal:'عادية', important:'مهمة', urgent:'عاجلة'}[item.priority] %></span>
+      <h1 style="margin-top:10px;"><%= item.title %></h1>
+    </div>
+  </div>
+
+  <div class="meta-row">
+    <span class="m-item"><i class="fa-regular fa-calendar"></i> <%= dayjs(item.scheduled_date).format('dddd DD MMMM YYYY') %></span>
+    <span class="m-item"><i class="fa-regular fa-clock"></i> أُنشئ في <%= dayjs(item.created_at).format('DD/MM/YYYY') %></span>
+  </div>
+
+  <% if (item.description) { %>
+    <div class="section-title">الوصف</div>
+    <p><%= item.description %></p>
+  <% } %>
+  <% if (item.objective) { %>
+    <div class="section-title">الهدف التربوي</div>
+    <p><%= item.objective %></p>
+  <% } %>
+  <% if (item.materials) { %>
+    <div class="section-title">المواد المطلوبة</div>
+    <p><%= item.materials %></p>
+  <% } %>
+
+  <% if (item.attachments && item.attachments.length) { %>
+    <div class="section-title">المرفقات</div>
+    <div class="attach-list">
+      <% item.attachments.forEach(function(a) { %>
+        <a class="attach-chip" href="data:<%= a.mime %>;base64,<%= a.data %>" download="<%= a.name %>" target="_blank"><i class="fa-solid fa-paperclip"></i> <%= a.name %></a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<div class="card">
+  <div class="card-title">متابعة الفصول</div>
+  <div class="card-sub">حالة الاستلام والتنفيذ لكل فصل تم تعيينه</div>
+
+  <% assignments.forEach(function(a) { %>
+    <div class="assign-row">
+      <div class="a-left">
+        <span class="class-dot" style="background: <%= a.class_color %>;"></span>
+        <div>
+          <div style="font-weight:700;"><%= a.class_name %></div>
+          <% if (a.status === 'received') { %>
+            <div class="text-muted" style="font-size:12px;">استلمته <%= a.received_by_name %> - <%= dayjs(a.received_at).format('DD/MM HH:mm') %></div>
+          <% } else if (a.status === 'executed') { %>
+            <div class="text-muted" style="font-size:12px;">نفّذته <%= a.executed_by_name %> - <%= dayjs(a.executed_at).format('DD/MM HH:mm') %></div>
+          <% } %>
+        </div>
+      </div>
+      <span class="badge badge-<%= a.status %>">
+        <span class="badge-dot"></span>
+        <%= {pending: 'بانتظار الاستلام', received: 'تم الاستلام', executed: 'تم التنفيذ'}[a.status] %>
+      </span>
+    </div>
+    <% if (a.status === 'executed' && (a.execution_notes || a.execution_photos.length)) { %>
+      <div class="card" style="background:#FBFCFE; box-shadow:none; margin-top:-4px; margin-bottom:14px;">
+        <% if (a.execution_notes) { %><p><%= a.execution_notes %></p><% } %>
+        <% if (a.execution_photos.length) { %>
+          <div class="photo-grid">
+            <% a.execution_photos.forEach(function(p) { %>
+              <a href="data:<%= p.mime %>;base64,<%= p.data %>" target="_blank"><img src="data:<%= p.mime %>;base64,<%= p.data %>" alt="صورة تنفيذ" /></a>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  <% }) %>
+
+  <% if (!assignments.length) { %>
+    <div class="empty-state"><p>لم يتم تعيين أي فصل بعد.</p></div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

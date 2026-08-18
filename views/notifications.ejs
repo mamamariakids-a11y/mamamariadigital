@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="page-actions">
+  <div>
+    <h1>الإشعارات</h1>
+    <div class="sub">جميع التنبيهات المتعلقة بحسابك</div>
+  </div>
+  <form method="POST" action="/notifications/read-all">
+    <button class="btn btn-secondary btn-sm" type="submit">تعليم الكل كمقروء</button>
+  </form>
+</div>
+
+<div class="card">
+  <% if (!items.length) { %>
+    <div class="empty-state">
+      <div class="es-icon">🔔</div>
+      <h3>لا توجد إشعارات</h3>
+      <p>ستظهر هنا كل التحديثات المتعلقة بالدروس والأنشطة.</p>
+    </div>
+  <% } else { %>
+    <% items.forEach(function(n) { %>
+      <div class="notif-item">
+        <div class="flex-between">
+          <div class="nt"><%= n.title %></div>
+          <% if (!n.is_read) { %><span class="badge badge-received">جديد</span><% } %>
+        </div>
+        <% if (n.message) { %><div class="nm"><%= n.message %></div><% } %>
+        <div class="nd"><%= dayjs(n.created_at).format('dddd DD MMMM YYYY - HH:mm') %></div>
+        <% if (n.link) { %><a href="<%= n.link %>" class="btn btn-secondary btn-sm" style="margin-top:8px;">عرض التفاصيل</a><% } %>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
